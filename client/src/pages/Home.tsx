@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
-  CheckCircle2, 
   WifiOff, 
   Zap, 
   BrainCircuit, 
@@ -28,15 +27,15 @@ import servicesImg from "@/assets/images/software-services.png";
 import abstractBg from "@/assets/images/abstract-bg.png";
 
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] } }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
+    transition: { staggerChildren: 0.12 }
   }
 };
 
@@ -46,7 +45,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -56,35 +55,44 @@ export default function Home() {
     setMobileMenuOpen(false);
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = el.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans selection:bg-primary/20 selection:text-primary">
+    <div className="min-h-screen bg-white font-sans selection:bg-slate-900 selection:text-white">
       {/* Navigation */}
       <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white/80 backdrop-blur-md border-b border-border shadow-sm" : "bg-transparent"
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          isScrolled ? "bg-white/90 backdrop-blur-xl border-b border-slate-100 py-4 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]" : "bg-transparent py-6"
         }`}
       >
-        <div className="container mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollTo('hero')}>
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xl">
+        <div className="container mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => scrollTo('hero')}>
+            <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-xl transition-transform group-hover:scale-105">
               M
             </div>
-            <span className="font-heading font-bold text-xl tracking-tight text-foreground">
-              Mato<span className="text-primary">Work</span>
+            <span className="font-heading font-bold text-xl tracking-tight text-slate-900">
+              Mato<span className="text-slate-500">Work</span>
             </span>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {['Features', 'Services', 'Pricing', 'About'].map((item) => (
+          <nav className="hidden md:flex items-center gap-10">
+            {['Features', 'Services', 'About'].map((item) => (
               <button 
                 key={item}
                 onClick={() => scrollTo(item.toLowerCase())}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[13px] uppercase tracking-widest font-semibold text-slate-500 hover:text-slate-900 transition-colors"
                 data-testid={`link-${item.toLowerCase()}`}
               >
                 {item}
@@ -92,16 +100,24 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" className="font-medium" onClick={() => scrollTo('contact')}>Contact</Button>
-            <Button onClick={() => scrollTo('contact')} className="shadow-lg shadow-primary/20" data-testid="button-book-demo">
+          <div className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => scrollTo('contact')} 
+              className="text-[13px] uppercase tracking-widest font-semibold text-slate-900 hover:opacity-70 transition-opacity"
+            >
+              Get Pricing
+            </button>
+            <Button 
+              onClick={() => scrollTo('contact')} 
+              className="bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none" 
+              data-testid="button-book-demo"
+            >
               Book Demo
             </Button>
           </div>
 
-          {/* Mobile Menu Toggle */}
           <button 
-            className="md:hidden p-2 text-foreground"
+            className="md:hidden p-2 text-slate-900"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -110,353 +126,305 @@ export default function Home() {
 
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-border shadow-lg py-4 px-4 flex flex-col gap-4">
-            {['Features', 'Services', 'Pricing', 'About', 'Contact'].map((item) => (
+          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-2xl py-8 px-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
+            {['Features', 'Services', 'About', 'Contact'].map((item) => (
               <button 
                 key={item}
                 onClick={() => scrollTo(item.toLowerCase())}
-                className="text-left py-2 text-lg font-medium text-foreground border-b border-border/50"
+                className="text-left text-lg font-semibold text-slate-900"
               >
                 {item}
               </button>
             ))}
-            <Button className="w-full mt-2" onClick={() => scrollTo('contact')}>Book Demo</Button>
+            <Button className="w-full bg-slate-900 py-6" onClick={() => scrollTo('contact')}>Book Demo</Button>
           </div>
         )}
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url(${abstractBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <section id="hero" className="relative pt-40 pb-24 md:pt-56 md:pb-40 overflow-hidden bg-[#fafafa]">
+        <div className="absolute inset-0 z-0 opacity-[0.02] pointer-events-none grayscale" style={{ backgroundImage: `url(${abstractBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         
-        <div className="container mx-auto px-4 md:px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
             <motion.div 
               initial="hidden" 
               animate="visible" 
               variants={staggerContainer}
-              className="max-w-2xl"
             >
-              <motion.div variants={fadeIn} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6 border border-primary/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <motion.div variants={fadeIn} className="inline-block mb-6">
+                <span className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 border-b border-slate-200 pb-2">
+                  Enterprise POS Systems
                 </span>
-                Next-Gen POS System
               </motion.div>
-              <motion.h1 variants={fadeIn} className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-heading leading-[1.1] tracking-tight mb-6 text-foreground">
-                Smarter Retail.<br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Offline-First.</span>
+              <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-[1.05] tracking-tight mb-8 text-slate-900">
+                The New Standard<br/>
+                In <span className="text-slate-400 italic font-serif">Retail Operations.</span>
               </motion.h1>
-              <motion.p variants={fadeIn} className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl">
-                Empower your business with fast billing, AI-driven insights, and local data storage. A POS built for reliability—even without an internet connection.
+              <motion.p variants={fadeIn} className="text-lg md:text-xl text-slate-500 mb-12 leading-relaxed max-w-2xl mx-auto font-medium">
+                Offline-first architecture meet sophisticated AI insights. MatoWork provides the infrastructure for modern, high-volume commerce environments.
               </motion.p>
-              <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="h-14 px-8 text-base shadow-xl shadow-primary/20" onClick={() => scrollTo('pricing')}>
-                  Explore Plans
+              <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-slate-900 text-white hover:bg-slate-800 h-16 px-10 text-[13px] uppercase tracking-widest font-bold rounded-none" 
+                  onClick={() => scrollTo('contact')}
+                >
+                  Request Consultation
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 text-base group" onClick={() => scrollTo('features')}>
-                  View Features
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-slate-200 hover:bg-slate-50 h-16 px-10 text-[13px] uppercase tracking-widest font-bold rounded-none" 
+                  onClick={() => scrollTo('features')}
+                >
+                  Explore Technology
                 </Button>
-              </motion.div>
-              <motion.div variants={fadeIn} className="mt-10 flex items-center gap-6 text-sm text-muted-foreground font-medium">
-                <div className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> No Hidden Fees</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> 24/7 Support</div>
-              </motion.div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, rotate: 1 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative lg:ml-auto"
-            >
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border/50 bg-white p-2">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-50 z-10 pointer-events-none" />
-                <img 
-                  src={heroImg} 
-                  alt="MatoWork Modern POS Interface" 
-                  className="w-full h-auto rounded-xl object-cover"
-                />
-              </div>
-              
-              {/* Floating Badge */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-border flex items-center gap-4 z-20"
-              >
-                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Lightning Fast</p>
-                  <p className="text-xs text-muted-foreground">Sub-second billing</p>
-                </div>
               </motion.div>
             </motion.div>
           </div>
-        </div>
-      </section>
 
-      {/* Logos / Trust Strip */}
-      <section className="py-10 border-y border-border bg-muted/30">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm font-medium text-muted-foreground mb-6 uppercase tracking-wider">Trusted by modern businesses</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-            {/* Placeholder logos, using text for now */}
-            {['RetailCo', 'FreshMart', 'LuxeStore', 'QuickCafe', 'TechShop'].map((name) => (
-              <span key={name} className="font-heading font-bold text-xl">{name}</span>
-            ))}
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: [0.21, 0.45, 0.32, 0.9] }}
+            className="mt-24 max-w-6xl mx-auto"
+          >
+            <div className="relative rounded-sm overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-slate-900">
+              <img 
+                src={heroImg} 
+                alt="System Interface" 
+                className="w-full h-auto opacity-90 transition-transform duration-700 hover:scale-[1.02]"
+              />
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* POS Features Section */}
-      <section id="features" className="py-24 bg-white relative">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-primary font-semibold tracking-wide uppercase mb-3">Core Capabilities</h2>
-            <h3 className="text-3xl md:text-4xl font-bold font-heading mb-4 text-foreground">Everything you need to run your business</h3>
-            <p className="text-muted-foreground text-lg">We've engineered a point-of-sale system that handles the complexity of retail, so you can focus on growth.</p>
+      <section id="features" className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-24">
+            <div className="max-w-2xl">
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-6">Core Technology</h2>
+              <h3 className="text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight">
+                Engineering excellence at the core of your business.
+              </h3>
+            </div>
+            <div className="pb-2">
+              <button 
+                onClick={() => scrollTo('contact')}
+                className="group flex items-center gap-2 text-[13px] uppercase tracking-widest font-bold text-slate-900"
+              >
+                Inquire about custom modules
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
             {[
-              { icon: WifiOff, title: "Offline-First Architecture", desc: "Keep selling even when the internet drops. Data syncs automatically once you're back online." },
-              { icon: Zap, title: "Fast Billing", desc: "Process transactions in milliseconds. Reduce queues and improve customer satisfaction." },
-              { icon: BrainCircuit, title: "AI Insights", desc: "Predict trends, understand purchasing behavior, and optimize your strategy with built-in intelligence." },
-              { icon: Database, title: "Local Data Storage", desc: "Your data stays on your device for maximum speed and privacy, with secure cloud backups." },
-              { icon: LineChart, title: "Real-Time Analytics", desc: "Monitor sales, inventory, and performance metrics from anywhere, in real-time." },
-              { icon: Package, title: "Inventory Management", desc: "Automate stock tracking, receive low-stock alerts, and manage multiple locations easily." },
-              { icon: Users, title: "CRM Intelligence", desc: "Build customer profiles, track loyalty, and personalize marketing automatically." },
-              { icon: Smartphone, title: "Multi-Device Sync", desc: "Use on tablets, phones, or desktops. Changes reflect instantly across all your hardware." },
-              { icon: Puzzle, title: "Seamless Integrations", desc: "Connect with accounting software, payment gateways, and e-commerce platforms effortlessly." },
-              { icon: ShieldCheck, title: "Enterprise Security", desc: "Bank-level encryption and role-based access control protect your business and customers." },
-              { icon: Workflow, title: "Smart Automation", desc: "Automate end-of-day reporting, reordering, and employee scheduling." },
+              { icon: WifiOff, title: "Offline Resilience", desc: "Military-grade data persistence that operates without connectivity, syncing seamlessly when online." },
+              { icon: Zap, title: "High-Performance Billing", desc: "Engineered for high-volume environments where transaction speed is a critical business metric." },
+              { icon: BrainCircuit, title: "Neural Analytics", desc: "Advanced predictive models that transform raw transaction data into strategic growth insights." },
+              { icon: Database, title: "Edge Storage", desc: "Data is stored locally for zero-latency performance, backed by encrypted cloud redundancy." },
+              { icon: LineChart, title: "Precision Metrics", desc: "Granular, real-time visibility into every facet of your retail operation across all channels." },
+              { icon: Package, title: "Adaptive Inventory", desc: "Automated replenishment workflows and multi-node stock tracking for complex supply chains." },
             ].map((feature, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5 }}
-                className="bg-background p-8 rounded-2xl border border-border shadow-sm hover:shadow-xl transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                  <feature.icon className="w-6 h-6 text-primary" />
+              <div key={i} className="group">
+                <div className="w-12 h-12 flex items-center justify-center mb-8 bg-slate-50 rounded-lg group-hover:bg-slate-900 transition-colors duration-300">
+                  <feature.icon className="w-5 h-5 text-slate-900 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
                 </div>
-                <h4 className="text-xl font-bold mb-3 text-foreground font-heading">{feature.title}</h4>
-                <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
-              </motion.div>
+                <h4 className="text-lg font-bold mb-4 text-slate-900 font-heading tracking-tight">{feature.title}</h4>
+                <p className="text-slate-500 leading-relaxed font-medium text-[15px]">{feature.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-primary font-semibold tracking-wide uppercase mb-3">Beyond Software</h2>
-              <h3 className="text-3xl md:text-4xl font-bold font-heading mb-6 text-foreground">
-                Personalized Services & Development
+      <section id="services" className="py-32 bg-[#fafafa]">
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-24 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-slate-200/50 rounded-sm translate-x-4 translate-y-4 -z-10" />
+                <img 
+                  src={servicesImg} 
+                  alt="Engineering" 
+                  className="relative z-10 rounded-sm shadow-2xl w-full h-[600px] object-cover grayscale"
+                />
+              </div>
+            </div>
+            
+            <div className="order-1 lg:order-2">
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-6">Strategic Services</h2>
+              <h3 className="text-4xl md:text-5xl font-bold font-heading mb-8 text-slate-900 tracking-tight leading-tight">
+                Bespoke Software<br/>Architectures.
               </h3>
-              <p className="text-lg text-muted-foreground mb-8">
-                We don't just hand you a product and leave. Our engineering team works with you to ensure the software fits your exact operational needs.
+              <p className="text-lg text-slate-500 mb-12 leading-relaxed font-medium">
+                Our team provides end-to-end engineering services to customize, integrate, and optimize MatoWork for your specific operational requirements.
               </p>
               
-              <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-y-8 gap-x-12">
                 {[
-                  "Personalized Software Development",
-                  "Expert POS Implementation",
-                  "Workflow Customization",
-                  "Seamless Deployment & Integration",
-                  "Dedicated Support & Training",
-                  "Continuous Upgrades & Optimization"
+                  "System Integration",
+                  "Workflow Design",
+                  "Custom Modules",
+                  "Data Migration",
+                  "Performance Tuning",
+                  "Continuous Support"
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                      <Check className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="font-medium text-foreground">{item}</span>
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="w-1.5 h-1.5 bg-slate-900 shrink-0" />
+                    <span className="font-bold text-slate-900 text-[13px] uppercase tracking-widest">{item}</span>
                   </div>
                 ))}
               </div>
               
-              <Button className="mt-10 h-12 px-8" onClick={() => scrollTo('contact')}>Discuss Your Project</Button>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/5 rounded-3xl translate-x-4 translate-y-4" />
-              <img 
-                src={servicesImg} 
-                alt="Software Engineers Collaborating" 
-                className="relative z-10 rounded-3xl shadow-2xl w-full h-auto object-cover border border-border"
-              />
+              <div className="mt-16 pt-8 border-t border-slate-200">
+                <p className="text-slate-400 text-sm font-medium italic">
+                  * Custom pricing available upon consultation.
+                </p>
+                <Button 
+                  className="mt-8 bg-slate-900 text-white h-14 px-10 text-[13px] uppercase tracking-widest font-bold rounded-none" 
+                  onClick={() => scrollTo('contact')}
+                >
+                  Speak with an Architect
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-primary font-semibold tracking-wide uppercase mb-3">Transparent Pricing</h2>
-            <h3 className="text-3xl md:text-4xl font-bold font-heading mb-4 text-foreground">Choose the right plan for your growth</h3>
-            <p className="text-muted-foreground text-lg">No hidden fees. Scale your software as your business expands.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-            {/* Starter */}
-            <div className="bg-background rounded-3xl border border-border p-8 shadow-sm flex flex-col h-full">
-              <div className="mb-6">
-                <h4 className="text-xl font-bold text-foreground font-heading">Starter</h4>
-                <p className="text-muted-foreground mt-2">Essential features for single-location setups.</p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-extrabold">$29</span><span className="text-muted-foreground">/mo</span>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1">
-                {['Basic POS Features', 'Local Data Storage', 'Standard Reporting', 'Email Support'].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full h-12" onClick={() => scrollTo('contact')}>Get Started</Button>
-            </div>
-
-            {/* Growth (Highlighted) */}
-            <div className="bg-primary text-primary-foreground rounded-3xl border border-primary p-8 shadow-2xl flex flex-col h-full relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-400 to-indigo-400 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                Recommended
-              </div>
-              <div className="mb-6 mt-2">
-                <h4 className="text-xl font-bold font-heading text-white">Growth</h4>
-                <p className="text-primary-foreground/80 mt-2">Advanced tools for expanding businesses.</p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-extrabold text-white">$79</span><span className="text-primary-foreground/80">/mo</span>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1">
-                {[
-                  'Everything in Starter', 
-                  'Multi-Device Sync', 
-                  'Advanced Inventory & Alerts', 
-                  'Basic CRM & Loyalty', 
-                  'Priority Support'
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-5 h-5 text-blue-200 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full h-12 bg-white text-primary hover:bg-white/90 font-semibold" onClick={() => scrollTo('contact')}>Start Free Trial</Button>
-            </div>
-
-            {/* Enterprise */}
-            <div className="bg-background rounded-3xl border border-border p-8 shadow-sm flex flex-col h-full">
-              <div className="mb-6">
-                <h4 className="text-xl font-bold text-foreground font-heading">Enterprise</h4>
-                <p className="text-muted-foreground mt-2">Custom solutions for large scale operations.</p>
-              </div>
-              <div className="mb-8">
-                <span className="text-4xl font-extrabold">Custom</span>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1">
-                {[
-                  'Everything in Growth', 
-                  'Advanced AI Insights', 
-                  'Custom Workflows & APIs', 
-                  'Dedicated Account Manager', 
-                  'On-Premise Deployment Options'
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full h-12" onClick={() => scrollTo('contact')}>Contact Sales</Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Issues Fixed (Brochure Audit) */}
-      <section className="py-16 bg-muted/50 border-y border-border">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="bg-white rounded-2xl p-8 border border-border shadow-sm max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Zap className="text-amber-500 w-5 h-5" />
-              Website Redesign Audit Notes
-            </h3>
-            <p className="text-muted-foreground mb-4 text-sm">As requested, we transformed the dense PDF brochure into a high-converting website. Here is what we fixed:</p>
-            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm text-foreground">
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Fixed typos like "POS FEATURERS" to "POS Features".</li>
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Removed internal draft text ("Here's a shorter version").</li>
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Normalized inconsistent spelling (e.g., customisation vs customization).</li>
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Standardized plan names ("Enterprises" → "Enterprise").</li>
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Transformed dense paragraphs into scannable cards and bullet points.</li>
-              <li className="flex items-start gap-2"><Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"/> Applied a modern, cohesive brand identity with clear visual hierarchy.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA / Contact Section */}
-      <section id="contact" className="py-24 relative overflow-hidden bg-foreground text-background">
-        <div className="absolute inset-0 bg-primary/10" />
-        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6">Ready to upgrade your business?</h2>
-          <p className="text-lg text-background/80 max-w-2xl mx-auto mb-10">
-            Get in touch with our team today to schedule a demo or discuss a custom solution tailored to your workflow.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-12">
-            <div className="flex items-center gap-3 bg-white/10 px-6 py-4 rounded-xl border border-white/10 backdrop-blur-sm">
-              <Phone className="w-6 h-6 text-primary" />
-              <div className="text-left">
-                <p className="text-xs text-background/60 font-medium uppercase tracking-wider">Call Us</p>
-                <p className="font-semibold text-lg">+91 7559438082 <span className="opacity-50 font-normal mx-1">|</span> 8887518471</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 bg-white/10 px-6 py-4 rounded-xl border border-white/10 backdrop-blur-sm">
-              <Mail className="w-6 h-6 text-primary" />
-              <div className="text-left">
-                <p className="text-xs text-background/60 font-medium uppercase tracking-wider">Email Us</p>
-                <div className="flex flex-col text-sm font-medium">
-                  <a href="mailto:pradumn.upadhyay1@gmail.com" className="hover:text-primary transition-colors">pradumn.upadhyay1@gmail.com</a>
-                  <a href="mailto:akarshmishra333@gmail.com" className="hover:text-primary transition-colors">akarshmishra333@gmail.com</a>
+      {/* Contact Section */}
+      <section id="contact" className="py-40 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-slate-900 rounded-sm p-12 md:p-24 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              
+              <div className="relative z-10 grid md:grid-cols-2 gap-20">
+                <div>
+                  <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-8">Get in Touch</h2>
+                  <h3 className="text-4xl md:text-5xl font-bold text-white font-heading mb-8 tracking-tight leading-tight">
+                    Start your<br/>transformation.
+                  </h3>
+                  <p className="text-slate-400 text-lg mb-12 font-medium leading-relaxed">
+                    Contact us for custom pricing, enterprise demos, or technical inquiries.
+                  </p>
+                  
+                  <div className="space-y-8">
+                    <div className="flex items-start gap-6">
+                      <div className="w-12 h-12 bg-white/10 rounded flex items-center justify-center shrink-0">
+                        <Phone className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Telephone</p>
+                        <p className="text-white font-bold">+91 7559438082</p>
+                        <p className="text-white font-bold">+91 8887518471</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-6">
+                      <div className="w-12 h-12 bg-white/10 rounded flex items-center justify-center shrink-0">
+                        <Mail className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Email</p>
+                        <a href="mailto:akarshmishra333@gmail.com" className="text-white font-bold block hover:text-slate-300 transition-colors">akarshmishra333@gmail.com</a>
+                        <a href="mailto:pradumn.upadhyay1@gmail.com" className="text-white font-bold block hover:text-slate-300 transition-colors">pradumn.upadhyay1@gmail.com</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-10 rounded-sm">
+                  <h4 className="text-slate-900 font-bold mb-8 text-[13px] uppercase tracking-widest">Inquiry Form</h4>
+                  <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    <div>
+                      <input 
+                        type="text" 
+                        placeholder="Full Name" 
+                        className="w-full bg-slate-50 border-none rounded-none p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none" 
+                      />
+                    </div>
+                    <div>
+                      <input 
+                        type="email" 
+                        placeholder="Work Email" 
+                        className="w-full bg-slate-50 border-none rounded-none p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none" 
+                      />
+                    </div>
+                    <div>
+                      <select className="w-full bg-slate-50 border-none rounded-none p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none text-slate-500">
+                        <option>Interested In Pricing</option>
+                        <option>Book a Demo</option>
+                        <option>Technical Question</option>
+                        <option>Partnership</option>
+                      </select>
+                    </div>
+                    <div>
+                      <textarea 
+                        placeholder="Message" 
+                        rows={4}
+                        className="w-full bg-slate-50 border-none rounded-none p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none resize-none" 
+                      ></textarea>
+                    </div>
+                    <Button className="w-full bg-slate-900 text-white h-14 text-[13px] uppercase tracking-widest font-bold rounded-none shadow-none">
+                      Send Inquiry
+                    </Button>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
-          
-          <Button size="lg" className="h-14 px-10 text-lg bg-primary hover:bg-primary/90 text-white" data-testid="button-final-cta">
-            Request A Callback
-          </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-foreground py-8 border-t border-white/10 text-center text-background/60">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-white font-bold text-xs">
-              M
+      <footer className="bg-white py-20 border-t border-slate-100">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-2.5 mb-8">
+                <div className="w-8 h-8 rounded bg-slate-900 flex items-center justify-center text-white font-bold text-lg">
+                  M
+                </div>
+                <span className="font-heading font-bold tracking-tight text-slate-900 text-lg">MatoWork</span>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                Empowering modern retail through advanced software engineering and edge computing.
+              </p>
             </div>
-            <span className="font-heading font-bold tracking-tight text-white">MatoWork</span>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
+              <div>
+                <h5 className="text-[11px] uppercase tracking-widest font-bold text-slate-900 mb-6">Product</h5>
+                <ul className="space-y-4">
+                  <li><button onClick={() => scrollTo('features')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Features</button></li>
+                  <li><button onClick={() => scrollTo('services')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Technology</button></li>
+                  <li><button onClick={() => scrollTo('contact')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Pricing</button></li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="text-[11px] uppercase tracking-widest font-bold text-slate-900 mb-6">Company</h5>
+                <ul className="space-y-4">
+                  <li><button onClick={() => scrollTo('hero')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">About</button></li>
+                  <li><button onClick={() => scrollTo('contact')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Contact</button></li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <p className="text-sm">&copy; {new Date().getFullYear()} MatoWork. All rights reserved.</p>
-          <div className="flex gap-4 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
+          
+          <div className="mt-20 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-[12px] font-bold tracking-widest uppercase">
+            <p>&copy; {new Date().getFullYear()} MatoWork. All rights reserved.</p>
+            <div className="flex gap-8">
+              <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>
