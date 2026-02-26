@@ -86,3 +86,8 @@
     font-family: 'Libre Baskerville', serif;
   }
 }
+
+/* Mobile menu scroll lock */
+body.menu-open {
+  overflow: hidden;
+}
