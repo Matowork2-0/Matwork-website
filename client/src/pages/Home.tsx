@@ -353,6 +353,11 @@ export default function Home() {
                 ))}
               </div>
 
+              <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-slate-200">
+                <p className="text-slate-400 text-sm font-medium italic">
+                  * Custom pricing available upon consultation.
+                </p>
+              </div>
             </div>
           </div>
         </div>
