@@ -7,17 +7,9 @@ import {
   Database,
   LineChart,
   Package,
-  Users,
-  Smartphone,
-  Puzzle,
-  ShieldCheck,
-  Workflow,
   ArrowRight,
   Menu,
   X,
-  Phone,
-  Mail,
-  Check,
   Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,23 +18,13 @@ import { useToast } from "@/hooks/use-toast";
 // Assets
 import heroImg from "@/assets/images/hero-pos.png";
 import servicesImg from "@/assets/images/software-services.png";
-import abstractBg from "@/assets/images/abstract-bg.png";
 
 // Logo: served from client/public/favicon.png (same as mw_logo.png)
 const logoImg = "/favicon.png";
 
-// ── Google Sheets Integration ──────────────────────────────────────────────────
-// INSTRUCTIONS:
-// 1. Go to https://script.google.com → New Project
-// 2. Paste the Apps Script code provided in the walkthrough
-// 3. Deploy → New deployment → Web app → Execute as: Me, Who has access: Anyone
-// 4. Copy the URL and paste it below:
-const GOOGLE_SHEET_URL = "";
-// ───────────────────────────────────────────────────────────────────────────────
-
 const fadeIn = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] as [number, number, number, number] } }
 };
 
 const staggerContainer = {
@@ -61,9 +43,9 @@ export default function Home() {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    interest: "",
-    message: "",
+    outlet: "",
+    contact: "",
+    address: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -110,19 +92,10 @@ export default function Home() {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.name.trim() || !formData.email.trim()) {
+    if (!formData.name.trim() || !formData.contact.trim()) {
       toast({
         title: "Missing fields",
-        description: "Please fill in at least your name and email.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!GOOGLE_SHEET_URL) {
-      toast({
-        title: "Form not configured",
-        description: "The Google Sheet integration URL has not been set up yet. Please contact the site admin.",
+        description: "Please fill in at least your name and contact number.",
         variant: "destructive",
       });
       return;
@@ -130,29 +103,50 @@ export default function Home() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(GOOGLE_SHEET_URL, {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          interest: formData.interest || "Not specified",
-          message: formData.message,
-          timestamp: new Date().toISOString(),
+          name: formData.name.trim(),
+          outlet: formData.outlet.trim(),
+          contact: formData.contact.trim(),
+          address: formData.address.trim(),
         }),
       });
 
-      // no-cors mode returns opaque response — we assume success if no error thrown
+      const data = await res.json();
+
+      if (res.status === 429) {
+        toast({
+          title: "Too many requests",
+          description: data.message || "Please wait a few minutes before trying again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (res.status === 400) {
+        toast({
+          title: "Invalid input",
+          description: data.message || "Please check your input and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || "Server error");
+      }
+
       toast({
         title: "Inquiry sent!",
         description: "Thank you. We'll get back to you shortly.",
       });
-      setFormData({ name: "", email: "", interest: "", message: "" });
+      setFormData({ name: "", outlet: "", contact: "", address: "" });
     } catch (err) {
       toast({
         title: "Something went wrong",
-        description: "Please try again or email us directly.",
+        description: "Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -321,16 +315,21 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-16 md:py-32 bg-[#fafafa]">
-        <div className="container mx-auto px-4 sm:px-6">
+      <section id="services" className="relative py-16 md:py-32 bg-[#fafafa] overflow-hidden">
+        {/* Mobile: background image treatment (like hero) */}
+        <div className="absolute inset-0 z-0 pointer-events-none lg:hidden" style={{ backgroundImage: `url(${servicesImg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12, filter: 'grayscale(1)' }} />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#fafafa]/80 via-[#fafafa]/40 to-[#fafafa] pointer-events-none lg:hidden" />
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-            <div className="order-2 lg:order-1">
+            {/* Desktop: show the image normally */}
+            <div className="order-2 lg:order-1 hidden lg:block">
               <div className="relative">
-                <div className="absolute -inset-4 bg-slate-200/50 rounded-sm translate-x-4 translate-y-4 -z-10 hidden md:block" />
+                <div className="absolute -inset-4 bg-slate-200/50 rounded-sm translate-x-4 translate-y-4 -z-10" />
                 <img
                   src={servicesImg}
                   alt="Software Engineering"
-                  className="relative z-10 rounded-sm shadow-2xl w-full h-auto max-h-[350px] md:max-h-[600px] object-cover grayscale"
+                  className="relative z-10 rounded-sm shadow-2xl w-full h-auto max-h-[600px] object-cover grayscale"
                 />
               </div>
             </div>
@@ -412,38 +411,14 @@ export default function Home() {
               <div className="absolute top-0 right-0 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-white/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
               <div className="relative z-10 grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-20">
-                <div>
+                <div className="flex flex-col justify-center">
                   <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-6 md:mb-8">Get in Touch</h2>
                   <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-heading mb-6 md:mb-8 tracking-tight leading-tight">
                     Start your<br />transformation.
                   </h3>
-                  <p className="text-slate-400 text-base md:text-lg mb-8 md:mb-12 font-medium leading-relaxed">
-                    Contact us for custom pricing, enterprise demos, or technical inquiries.
+                  <p className="text-slate-400 text-base md:text-lg font-medium leading-relaxed">
+                    Contact us for custom pricing, enterprise demos, or technical inquiries. Fill out the form and we'll get back to you shortly.
                   </p>
-
-                  <div className="space-y-6 md:space-y-8">
-                    <div className="flex items-start gap-4 md:gap-6">
-                      <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded flex items-center justify-center shrink-0">
-                        <Phone className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Telephone</p>
-                        <p className="text-white font-bold text-sm md:text-base">+91 7559438082</p>
-                        <p className="text-white font-bold text-sm md:text-base">+91 8887518471</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4 md:gap-6">
-                      <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded flex items-center justify-center shrink-0">
-                        <Mail className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Email</p>
-                        <a href="mailto:akarshmishra333@gmail.com" className="text-white font-bold block hover:text-slate-300 transition-colors text-sm md:text-base truncate">akarshmishra333@gmail.com</a>
-                        <a href="mailto:pradumn.upadhyay1@gmail.com" className="text-white font-bold block hover:text-slate-300 transition-colors text-sm md:text-base truncate">pradumn.upadhyay1@gmail.com</a>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="bg-white p-6 sm:p-8 md:p-10 rounded-sm">
@@ -462,36 +437,32 @@ export default function Home() {
                     </div>
                     <div>
                       <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
+                        type="text"
+                        name="outlet"
+                        value={formData.outlet}
                         onChange={handleFormChange}
-                        placeholder="Work Email *"
+                        placeholder="Outlet / Business Name"
+                        className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="tel"
+                        name="contact"
+                        value={formData.contact}
+                        onChange={handleFormChange}
+                        placeholder="Contact Number *"
                         required
                         className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none"
                       />
                     </div>
                     <div>
-                      <select
-                        name="interest"
-                        value={formData.interest}
-                        onChange={handleFormChange}
-                        className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none text-slate-500"
-                      >
-                        <option value="" disabled>Select your interest</option>
-                        <option value="Interested In Pricing">Interested In Pricing</option>
-                        <option value="Book a Demo">Book a Demo</option>
-                        <option value="Technical Question">Technical Question</option>
-                        <option value="Partnership">Partnership</option>
-                      </select>
-                    </div>
-                    <div>
                       <textarea
-                        name="message"
-                        value={formData.message}
+                        name="address"
+                        value={formData.address}
                         onChange={handleFormChange}
-                        placeholder="Message"
-                        rows={4}
+                        placeholder="Address"
+                        rows={3}
                         className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none resize-none"
                       ></textarea>
                     </div>
