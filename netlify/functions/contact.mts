@@ -144,17 +144,19 @@ export default async (req: Request, context: Context) => {
             timestamp: new Date().toISOString(),
         };
 
+        console.log("[contact] Posting to Google Sheet URL:", sheetUrl.substring(0, 60) + "...");
+
         const sheetRes = await fetch(sheetUrl, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(payload),
+            redirect: "follow",
         });
 
         const sheetBody = await sheetRes.text().catch(() => "");
-        console.log("[contact] Google Sheets response:", sheetRes.status, sheetBody);
+        console.log("[contact] Google Sheets response:", sheetRes.status, sheetRes.url, sheetBody.substring(0, 500));
 
         if (!sheetRes.ok) {
-            console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody);
+            console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody.substring(0, 500));
             return new Response(
                 JSON.stringify({ message: "Failed to save inquiry. Please try again later." }),
                 { status: 502, headers: { "Content-Type": "application/json" } }
@@ -165,12 +167,10 @@ export default async (req: Request, context: Context) => {
             JSON.stringify({ message: "Inquiry received. Thank you!" }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err) {
-        console.error("[contact] Error processing contact form:", err);
+    } catch (err: any) {
+        console.error("[contact] Error processing contact form:", err?.message || err);
         return new Response(
-            JSON.stringify({
-                message: "Something went wrong. Please try again later.",
-            }),
+            JSON.stringify({ message: "Something went wrong. Please try again later." }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }

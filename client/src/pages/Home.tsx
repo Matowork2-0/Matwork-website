@@ -184,12 +184,6 @@ export default function Home() {
           </nav>
 
           <div className="hidden md:flex items-center gap-6">
-            <button
-              onClick={() => scrollTo('contact')}
-              className="text-[13px] uppercase tracking-widest font-semibold text-slate-900 hover:opacity-70 transition-opacity"
-            >
-              Get Pricing
-            </button>
             <Button
               onClick={() => scrollTo('contact')}
               className="bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
@@ -359,17 +353,6 @@ export default function Home() {
                 ))}
               </div>
 
-              <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-slate-200">
-                <p className="text-slate-400 text-sm font-medium italic">
-                  * Custom pricing available upon consultation.
-                </p>
-                <Button
-                  className="mt-6 md:mt-8 bg-slate-900 text-white h-12 md:h-14 px-8 md:px-10 text-[12px] md:text-[13px] uppercase tracking-widest font-bold rounded-none"
-                  onClick={() => scrollTo('contact')}
-                >
-                  Speak with an Architect
-                </Button>
-              </div>
             </div>
           </div>
         </div>
@@ -384,7 +367,7 @@ export default function Home() {
               Built for retailers who<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">never stop selling.</span>
             </h3>
             <p className="text-base md:text-lg text-slate-500 leading-relaxed font-medium max-w-2xl mx-auto mb-10 md:mb-16">
-              MatoWork POS is built from the ground up for Indian retail — from restaurants and cafés to grocery stores and salons. Our offline-first billing system keeps your sales running even when the internet goes down, syncing automatically when you're back online. With sub-50ms transaction speeds, real-time inventory tracking, and AI-powered sales insights, we give every business owner the tools that enterprise chains take for granted.
+              MatoWork POS is built from the ground up for Indian retail from restaurants and cafés to grocery stores and salons. Our offline-first billing system keeps your sales running even when the internet goes down, syncing automatically when you're back online. With sub-50ms transaction speeds, real-time inventory tracking, and AI-powered sales insights, we give every business owner the tools that enterprise chains take for granted.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
               {[
@@ -508,7 +491,6 @@ export default function Home() {
                 <ul className="space-y-3 md:space-y-4">
                   <li><button onClick={() => scrollTo('features')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Features</button></li>
                   <li><button onClick={() => scrollTo('services')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Technology</button></li>
-                  <li><button onClick={() => scrollTo('contact')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Pricing</button></li>
                 </ul>
               </div>
               <div>

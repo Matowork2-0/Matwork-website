@@ -172,17 +172,19 @@ export async function registerRoutes(
         timestamp: new Date().toISOString(),
       };
 
+      console.log("[contact] Posting to Google Sheet URL:", sheetUrl.substring(0, 60) + "...");
+
       const sheetRes = await fetch(sheetUrl, {
         method: "POST",
-        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload),
+        redirect: "follow",
       });
 
       const sheetBody = await sheetRes.text().catch(() => "");
-      console.log("[contact] Google Sheets response:", sheetRes.status, sheetBody);
+      console.log("[contact] Google Sheets response:", sheetRes.status, sheetRes.url, sheetBody.substring(0, 500));
 
       if (!sheetRes.ok) {
-        console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody);
+        console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody.substring(0, 500));
         return res.status(502).json({
           message: "Failed to save inquiry. Please try again later.",
         });
@@ -191,8 +193,8 @@ export async function registerRoutes(
       return res.status(200).json({
         message: "Inquiry received. Thank you!",
       });
-    } catch (err) {
-      console.error("[contact] Error processing contact form:", err);
+    } catch (err: any) {
+      console.error("[contact] Error processing contact form:", err?.message || err);
       return res.status(500).json({
         message: "Something went wrong. Please try again later.",
       });
