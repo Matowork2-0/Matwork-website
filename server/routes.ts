@@ -156,16 +156,9 @@ export async function registerRoutes(
       // Google Sheets proxy
       const sheetUrl = process.env.GOOGLE_SHEET_URL;
       if (!sheetUrl) {
-        console.warn("GOOGLE_SHEET_URL environment variable is not set");
-        console.log("[contact] Form submission (sheet not configured):", {
-          name,
-          outlet,
-          contact,
-          address: address?.substring(0, 100),
-          timestamp: new Date().toISOString(),
-        });
-        return res.status(200).json({
-          message: "Inquiry received. Thank you!",
+        console.error("[contact] GOOGLE_SHEET_URL is NOT set. Form data lost.");
+        return res.status(500).json({
+          message: "Server configuration error. Please try again later.",
         });
       }
 
@@ -181,13 +174,18 @@ export async function registerRoutes(
 
       const sheetRes = await fetch(sheetUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload),
-        redirect: "follow",
       });
 
+      const sheetBody = await sheetRes.text().catch(() => "");
+      console.log("[contact] Google Sheets response:", sheetRes.status, sheetBody);
+
       if (!sheetRes.ok) {
-        console.error("[contact] Google Sheets error:", sheetRes.status, await sheetRes.text().catch(() => ""));
+        console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody);
+        return res.status(502).json({
+          message: "Failed to save inquiry. Please try again later.",
+        });
       }
 
       return res.status(200).json({

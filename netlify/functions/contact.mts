@@ -128,17 +128,10 @@ export default async (req: Request, context: Context) => {
         // Google Sheets proxy
         const sheetUrl = process.env.GOOGLE_SHEET_URL;
         if (!sheetUrl) {
-            console.warn("GOOGLE_SHEET_URL environment variable is not set");
-            console.log("[contact] Form submission (sheet not configured):", {
-                name,
-                outlet,
-                contact,
-                address: address?.substring(0, 100),
-                timestamp: new Date().toISOString(),
-            });
+            console.error("[contact] GOOGLE_SHEET_URL is NOT set. Form data lost.");
             return new Response(
-                JSON.stringify({ message: "Inquiry received. Thank you!" }),
-                { status: 200, headers: { "Content-Type": "application/json" } }
+                JSON.stringify({ message: "Server configuration error. Please try again later." }),
+                { status: 500, headers: { "Content-Type": "application/json" } }
             );
         }
 
@@ -153,16 +146,18 @@ export default async (req: Request, context: Context) => {
 
         const sheetRes = await fetch(sheetUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(payload),
-            redirect: "follow",
         });
 
+        const sheetBody = await sheetRes.text().catch(() => "");
+        console.log("[contact] Google Sheets response:", sheetRes.status, sheetBody);
+
         if (!sheetRes.ok) {
-            console.error(
-                "[contact] Google Sheets error:",
-                sheetRes.status,
-                await sheetRes.text().catch(() => "")
+            console.error("[contact] Google Sheets error:", sheetRes.status, sheetBody);
+            return new Response(
+                JSON.stringify({ message: "Failed to save inquiry. Please try again later." }),
+                { status: 502, headers: { "Content-Type": "application/json" } }
             );
         }
 
