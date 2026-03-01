@@ -67,7 +67,7 @@ export default function Pricing() {
 
           <div className="flex items-center gap-4">
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => { window.location.href = "/#contact"; }}
               className="bg-slate-900 text-white hover:bg-slate-800 px-5 py-4 rounded-md h-auto text-[12px] uppercase tracking-widest font-bold border-none shadow-none"
             >
               Book Demo
@@ -121,7 +121,7 @@ export default function Pricing() {
                 {plan.period}
               </p>
               <Button
-                onClick={() => navigate("/#contact")}
+                onClick={() => { window.location.href = "/#contact"; }}
                 className={`mt-5 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
                   i === 2
                     ? "bg-white text-slate-900 hover:bg-slate-100"
@@ -175,7 +175,7 @@ export default function Pricing() {
 
         <div className="text-center mt-10">
           <Button
-            onClick={() => navigate("/")}
+            onClick={() => { window.location.href = "/#contact"; }}
             className="bg-slate-900 text-white hover:bg-slate-800 h-14 px-10 text-[13px] uppercase tracking-widest font-bold rounded-none shadow-none"
           >
             Book a Demo
