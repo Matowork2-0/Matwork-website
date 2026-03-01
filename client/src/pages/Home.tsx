@@ -10,10 +10,15 @@ import {
   ArrowRight,
   Menu,
   X,
-  Loader2
+  Loader2,
+  Check,
+  Minus,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { signOut, getUserInfo } from "@/components/AuthGate";
+import { useLocation } from "wouter";
 
 // Assets
 import heroImg from "@/assets/images/hero-pos.png";
@@ -39,6 +44,8 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
+  const user = getUserInfo();
+  const [, navigate] = useLocation();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -181,9 +188,15 @@ export default function Home() {
                 {item}
               </button>
             ))}
+            <button
+              onClick={() => navigate('/pricing')}
+              className="text-[13px] uppercase tracking-widest font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              Pricing
+            </button>
           </nav>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
             <Button
               onClick={() => scrollTo('contact')}
               className="bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
@@ -191,6 +204,16 @@ export default function Home() {
             >
               Book Demo
             </Button>
+            {user && (
+              <button
+                onClick={signOut}
+                title={`Signed in as ${user.email}`}
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <button
@@ -214,7 +237,22 @@ export default function Home() {
                 {item}
               </button>
             ))}
+            <button
+              onClick={() => { setMobileMenuOpen(false); navigate('/pricing'); }}
+              className="text-left text-lg font-semibold text-slate-900"
+            >
+              Pricing
+            </button>
             <Button className="w-full bg-slate-900 py-6" onClick={() => scrollTo('contact')}>Book Demo</Button>
+            {user && (
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 text-slate-500 text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign out ({user.email})
+              </button>
+            )}
           </div>
         )}
       </header>
@@ -496,6 +534,7 @@ export default function Home() {
                 <ul className="space-y-3 md:space-y-4">
                   <li><button onClick={() => scrollTo('features')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Features</button></li>
                   <li><button onClick={() => scrollTo('services')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Technology</button></li>
+                  <li><button onClick={() => navigate('/pricing')} className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Pricing</button></li>
                 </ul>
               </div>
               <div>
