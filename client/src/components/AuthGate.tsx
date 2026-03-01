@@ -74,6 +74,19 @@ export default function AuthGate({ children }: AuthGateProps) {
                 localStorage.setItem(STORAGE_KEY, response.credential);
                 setIsAuthenticated(true);
                 setError("");
+                // Log login activity — fire-and-forget, never blocks the user
+                const payload = decodeJwt(response.credential);
+                if (payload) {
+                  fetch("/api/log-activity", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: payload.name || "",
+                      email: payload.email || "",
+                      action: "login",
+                    }),
+                  }).catch(() => {});
+                }
               }
             }}
             onError={() => setError("Sign-in failed. Please try again.")}
