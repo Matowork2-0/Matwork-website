@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, ArrowLeft, LogOut, Wrench } from "lucide-react";
+import { Check, Minus, ArrowLeft, LogOut, Wrench, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
@@ -105,12 +105,22 @@ export default function Pricing() {
   const [, navigate] = useLocation();
   const user = getUserInfo();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add("menu-open");
+    } else {
+      document.body.classList.remove("menu-open");
+    }
+    return () => document.body.classList.remove("menu-open");
+  }, [mobileMenuOpen]);
 
   return (
     <motion.div
@@ -126,6 +136,7 @@ export default function Pricing() {
           : "bg-[#fafafa]/90 backdrop-blur-sm py-4 md:py-5"
       }`}>
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
+
           {/* Left: back + logo */}
           <div className="flex items-center gap-2.5 sm:gap-4">
             <button
@@ -144,9 +155,9 @@ export default function Pricing() {
             </div>
           </div>
 
-          {/* Right: CTA + avatar */}
-          <div className="flex items-center gap-3 md:gap-4">
-            {/* Book Demo — hidden on mobile like Home page */}
+          {/* Right: desktop CTA + avatar | mobile hamburger */}
+          <div className="flex items-center gap-4">
+            {/* Desktop only */}
             <Button
               onClick={() => { window.location.href = "/#contact"; }}
               className="hidden md:inline-flex bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
@@ -157,14 +168,73 @@ export default function Pricing() {
               <button
                 onClick={signOut}
                 title={`Signed in as ${user.email}`}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors"
+                className="hidden md:flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors"
               >
                 <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
                 <LogOut className="w-4 h-4" />
               </button>
             )}
+
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden p-2 text-slate-900"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-2xl py-8 px-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
+            {/* Nav links — with Pricing active */}
+            {[
+              { label: "Features",  href: "/#features"  },
+              { label: "Services",  href: "/#services"  },
+              { label: "About",     href: "/#about"     },
+              { label: "Contact",   href: "/#contact"   },
+            ].map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-left text-lg font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                {label}
+              </a>
+            ))}
+
+            {/* Active page */}
+            <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block" />
+              Pricing
+            </span>
+
+            <Button
+              className="w-full bg-slate-900 py-6 text-[12px] uppercase tracking-widest font-bold rounded-none"
+              onClick={() => { setMobileMenuOpen(false); window.location.href = "/#contact"; }}
+            >
+              Book Demo
+            </Button>
+
+            {/* Sign out with profile */}
+            {user && (
+              <button
+                onClick={signOut}
+                className="flex items-center gap-3 text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <img src={user.picture} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-900">{user.name}</p>
+                  <p className="text-xs text-slate-500">{user.email}</p>
+                </div>
+                <LogOut className="w-4 h-4 ml-auto text-slate-400" />
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Page hero — same bg as nav so they merge seamlessly */}
