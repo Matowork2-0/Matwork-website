@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Check, Minus, ArrowLeft, LogOut, Wrench } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
 
@@ -92,33 +94,51 @@ function Cell({ value }: { value: CellValue }) {
 export default function Pricing() {
   const [, navigate] = useLocation();
   const user = getUserInfo();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <motion.div
+      className="min-h-screen bg-white font-sans"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.21, 0.45, 0.32, 0.9] }}
+    >
       {/* Header */}
-      <header className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]">
-        <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <header className={`sticky top-0 w-full z-50 transition-all duration-500 ${
+        isScrolled
+          ? "bg-white/90 backdrop-blur-xl border-b border-slate-100 py-3 md:py-4 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]"
+          : "bg-white/70 backdrop-blur-sm border-b border-slate-100/60 py-4 md:py-5"
+      }`}>
+        <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
+          {/* Left: back + logo */}
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors text-[12px] uppercase tracking-widest font-bold"
+              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors text-[13px] uppercase tracking-widest font-semibold"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Back</span>
             </button>
-            <div className="w-px h-5 bg-slate-200 hidden sm:block" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <img src={logoImg} alt="MatoWork" className="w-7 h-7 rounded-md object-contain" />
-              <span className="font-bold text-base sm:text-lg tracking-tight text-slate-900">
-                Mato<span className="text-slate-400">Work</span>
+            <div className="w-px h-5 bg-slate-200" />
+            <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
+              <img src={logoImg} alt="MatoWork" className="w-9 h-9 rounded-lg object-contain transition-transform group-hover:scale-105" />
+              <span className="font-heading font-bold text-xl tracking-tight text-slate-900">
+                Mato<span className="text-slate-500">Work</span>
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Right: CTA + avatar */}
+          <div className="flex items-center gap-4">
             <Button
               onClick={() => { window.location.href = "/#contact"; }}
-              className="bg-slate-900 text-white hover:bg-slate-800 px-4 sm:px-5 py-2 rounded-md h-auto text-[11px] sm:text-[12px] uppercase tracking-widest font-bold border-none shadow-none"
+              className="bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
             >
               Book Demo
             </Button>
@@ -278,6 +298,6 @@ export default function Pricing() {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
