@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, ArrowLeft, LogOut, Wrench, Menu, X } from "lucide-react";
+import { Check, Minus, LogOut, Wrench, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
@@ -133,27 +133,39 @@ export default function Pricing() {
       <header className={`sticky top-0 w-full z-50 transition-all duration-500 ${
         isScrolled
           ? "bg-white/90 backdrop-blur-xl border-b border-slate-100 py-3 md:py-4 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]"
-          : "bg-[#fafafa]/90 backdrop-blur-sm py-4 md:py-5"
+          : "bg-transparent py-4 md:py-6"
       }`}>
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
 
-          {/* Left: back + logo */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors text-[13px] uppercase tracking-widest font-semibold"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Back</span>
-            </button>
-            <div className="w-px h-5 bg-slate-200 hidden sm:block" />
-            <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
-              <img src={logoImg} alt="MatoWork" className="w-9 h-9 rounded-lg object-contain transition-transform group-hover:scale-105" />
-              <span className="font-heading font-bold text-xl tracking-tight text-slate-900">
-                Mato<span className="text-slate-500">Work</span>
-              </span>
-            </div>
+          {/* Left: logo */}
+          <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
+            <img src={logoImg} alt="MatoWork" className="w-9 h-9 rounded-lg object-contain transition-transform group-hover:scale-105" />
+            <span className="font-heading font-bold text-xl tracking-tight text-slate-900">
+              Mato<span className="text-slate-500">Work</span>
+            </span>
           </div>
+
+          {/* Desktop nav links */}
+          <nav className="hidden md:flex items-center gap-10">
+            {[
+              { label: "Features", href: "/#features" },
+              { label: "Services", href: "/#services" },
+              { label: "About",    href: "/#about"    },
+            ].map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                className="text-[13px] uppercase tracking-widest font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                {label}
+              </a>
+            ))}
+            {/* Pricing — active page */}
+            <span className="relative text-[13px] uppercase tracking-widest font-semibold text-slate-900">
+              Pricing
+              <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
+            </span>
+          </nav>
 
           {/* Right: desktop CTA + avatar | mobile hamburger */}
           <div className="flex items-center gap-4">
@@ -189,12 +201,12 @@ export default function Pricing() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-2xl py-8 px-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
-            {/* Nav links — with Pricing active */}
+            {/* Nav links */}
             {[
-              { label: "Features",  href: "/#features"  },
-              { label: "Services",  href: "/#services"  },
-              { label: "About",     href: "/#about"     },
-              { label: "Contact",   href: "/#contact"   },
+              { label: "Features", href: "/#features" },
+              { label: "Services", href: "/#services" },
+              { label: "About",    href: "/#about"    },
+              { label: "Contact",  href: "/#contact"  },
             ].map(({ label, href }) => (
               <a
                 key={label}
@@ -206,9 +218,9 @@ export default function Pricing() {
               </a>
             ))}
 
-            {/* Active page */}
+            {/* Active page — Pricing */}
             <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block shrink-0" />
               Pricing
             </span>
 

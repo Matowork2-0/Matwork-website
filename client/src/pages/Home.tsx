@@ -43,6 +43,7 @@ const staggerContainer = {
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
   const { toast } = useToast();
   const user = getUserInfo();
   const [, navigate] = useLocation();
@@ -79,6 +80,22 @@ export default function Home() {
         }
       }, 150);
     }
+  }, []);
+
+  // Track active section via IntersectionObserver
+  useEffect(() => {
+    const ids = ['features', 'services', 'about', 'contact'];
+    const observers = ids.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { threshold: 0.25, rootMargin: '-80px 0px -45% 0px' }
+      );
+      obs.observe(el);
+      return obs;
+    });
+    return () => observers.forEach((o) => o?.disconnect());
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -195,16 +212,24 @@ export default function Home() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-10">
-            {['Features', 'Services', 'About'].map((item) => (
-              <button
-                key={item}
-                onClick={() => scrollTo(item.toLowerCase())}
-                className="text-[13px] uppercase tracking-widest font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-                data-testid={`link-${item.toLowerCase()}`}
-              >
-                {item}
-              </button>
-            ))}
+            {['Features', 'Services', 'About'].map((item) => {
+              const isActive = activeSection === item.toLowerCase();
+              return (
+                <button
+                  key={item}
+                  onClick={() => scrollTo(item.toLowerCase())}
+                  className={`text-[13px] uppercase tracking-widest font-semibold transition-colors relative ${
+                    isActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  data-testid={`link-${item.toLowerCase()}`}
+                >
+                  {item}
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
+                  )}
+                </button>
+              );
+            })}
             <button
               onClick={() => navigate('/pricing')}
               className="text-[13px] uppercase tracking-widest font-semibold text-slate-500 hover:text-slate-900 transition-colors"
@@ -245,18 +270,24 @@ export default function Home() {
         {/* Mobile Nav */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-2xl py-8 px-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
-            {['Features', 'Services', 'About', 'Contact'].map((item) => (
-              <button
-                key={item}
-                onClick={() => scrollTo(item.toLowerCase())}
-                className="text-left text-lg font-semibold text-slate-900"
-              >
-                {item}
-              </button>
-            ))}
+            {['Features', 'Services', 'About', 'Contact'].map((item) => {
+              const isActive = activeSection === item.toLowerCase();
+              return (
+                <button
+                  key={item}
+                  onClick={() => scrollTo(item.toLowerCase())}
+                  className={`text-left text-lg font-semibold flex items-center gap-2 transition-colors ${
+                    isActive ? 'text-slate-900' : 'text-slate-500'
+                  }`}
+                >
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block shrink-0" />}
+                  {item}
+                </button>
+              );
+            })}
             <button
               onClick={() => { setMobileMenuOpen(false); navigate('/pricing'); }}
-              className="text-left text-lg font-semibold text-slate-900"
+              className="text-left text-lg font-semibold text-slate-500 transition-colors"
             >
               Pricing
             </button>
