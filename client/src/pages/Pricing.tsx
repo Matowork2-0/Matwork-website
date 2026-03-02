@@ -96,7 +96,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]">
+      <header className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]">
         <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
