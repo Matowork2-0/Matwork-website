@@ -127,7 +127,7 @@ export default function Pricing() {
       }`}>
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Left: back + logo */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4">
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors text-[13px] uppercase tracking-widest font-semibold"
@@ -135,7 +135,7 @@ export default function Pricing() {
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Back</span>
             </button>
-            <div className="w-px h-5 bg-slate-200" />
+            <div className="w-px h-5 bg-slate-200 hidden sm:block" />
             <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
               <img src={logoImg} alt="MatoWork" className="w-9 h-9 rounded-lg object-contain transition-transform group-hover:scale-105" />
               <span className="font-heading font-bold text-xl tracking-tight text-slate-900">
@@ -145,10 +145,11 @@ export default function Pricing() {
           </div>
 
           {/* Right: CTA + avatar */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            {/* Book Demo — hidden on mobile like Home page */}
             <Button
               onClick={() => { window.location.href = "/#contact"; }}
-              className="bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
+              className="hidden md:inline-flex bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
             >
               Book Demo
             </Button>
