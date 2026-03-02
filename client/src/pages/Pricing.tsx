@@ -7,6 +7,16 @@ import { signOut, getUserInfo } from "@/components/AuthGate";
 
 const logoImg = "/favicon.png";
 
+const fadeIn = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] as [number, number, number, number] } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+};
+
 const plans = [
   {
     name: "Starter",
@@ -73,9 +83,9 @@ const featureGroups: FeatureGroup[] = [
   {
     group: "Enterprise Scale",
     features: [
-      { name: "Enterprise-Grade Multi-Outlet Management",               values: ["NO", "NO", "YES"] },
+      { name: "Enterprise-Grade Multi-Outlet Management",               values: ["NO", "YES", "YES"] },
       { name: "Advanced Customer Intelligence & CRM Engine",            values: ["NO", "NO", "YES"] },
-      { name: "Automated Operational Monitoring & Optimization",        values: ["NO", "NO", "YES"] },
+      { name: "Automated Operational Monitoring & Optimization",        values: ["NO", "YES", "YES"] },
       { name: "Scalable Architecture & Business Expansion",             values: ["NO", "NO", "YES"] },
     ],
   },
@@ -113,7 +123,7 @@ export default function Pricing() {
       <header className={`sticky top-0 w-full z-50 transition-all duration-500 ${
         isScrolled
           ? "bg-white/90 backdrop-blur-xl border-b border-slate-100 py-3 md:py-4 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]"
-          : "bg-white/70 backdrop-blur-sm border-b border-slate-100/60 py-4 md:py-5"
+          : "bg-[#fafafa]/90 backdrop-blur-sm py-4 md:py-5"
       }`}>
         <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Left: back + logo */}
@@ -156,27 +166,49 @@ export default function Pricing() {
         </div>
       </header>
 
-      {/* Page hero */}
-      <div className="bg-[#fafafa] border-b border-slate-100 py-12 md:py-24 text-center px-4">
-        <span className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400">Plans & Pricing</span>
-        <h1 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-heading">
-          Simple, transparent pricing.
-        </h1>
-        <p className="mt-4 text-slate-500 text-sm md:text-lg font-medium max-w-xl mx-auto">
-          Every plan includes the full core POS infrastructure. Scale your capabilities as your business grows.
-        </p>
+      {/* Page hero — same bg as nav so they merge seamlessly */}
+      <div className="bg-[#fafafa] border-b border-slate-100 py-14 md:py-28 text-center px-4">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="max-w-3xl mx-auto"
+        >
+          <motion.div variants={fadeIn}>
+            <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 border-b border-slate-200 pb-2">
+              Plans & Pricing
+            </span>
+          </motion.div>
 
-        {/* Installation fee callout */}
-        <div className="mt-8 inline-flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm max-w-sm sm:max-w-none mx-4 sm:mx-0 text-center sm:text-left">
-          <Wrench className="w-4 h-4 text-slate-500 shrink-0" />
-          <div>
-            <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
-            <p className="text-sm font-semibold text-slate-900 mt-0.5">
-              ₹45,000 installation fee{" "}
-              <span className="font-normal text-slate-500 block sm:inline">— custom pricing on consultation</span>
-            </p>
-          </div>
-        </div>
+          <motion.h1
+            variants={fadeIn}
+            className="mt-6 text-3xl sm:text-5xl md:text-6xl font-bold font-heading tracking-tight text-slate-900 leading-[1.05]"
+          >
+            Simple, transparent<br />
+            <span className="text-slate-400 italic font-serif">pricing.</span>
+          </motion.h1>
+
+          <motion.p
+            variants={fadeIn}
+            className="mt-5 text-slate-500 text-base md:text-lg font-medium max-w-xl mx-auto leading-relaxed"
+          >
+            Every plan includes the full core POS infrastructure. Scale your capabilities as your business grows.
+          </motion.p>
+
+          {/* Installation fee callout */}
+          <motion.div variants={fadeIn} className="mt-8 flex justify-center">
+            <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm text-center sm:text-left">
+              <Wrench className="w-4 h-4 text-slate-500 shrink-0" />
+              <div>
+                <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
+                <p className="text-sm font-semibold text-slate-900 mt-0.5">
+                  ₹45,000 installation fee{" "}
+                  <span className="font-normal text-slate-500 block sm:inline">— custom pricing on consultation</span>
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Main content */}
