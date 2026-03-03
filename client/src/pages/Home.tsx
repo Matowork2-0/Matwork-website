@@ -5,14 +5,12 @@ import {
   Zap,
   BrainCircuit,
   Database,
-  LineChart,
-  Package,
+  TrendingUp,
+  Sparkles,
   ArrowRight,
   Menu,
   X,
   Loader2,
-  Check,
-  Minus,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,10 +131,10 @@ export default function Home() {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.name.trim() || !formData.contact.trim()) {
+    if (!formData.name.trim() || !formData.outlet.trim() || !formData.contact.trim()) {
       toast({
         title: "Missing fields",
-        description: "Please fill in at least your name and contact number.",
+        description: "Please fill in your name, business name, and contact number.",
         variant: "destructive",
       });
       return;
@@ -291,14 +289,15 @@ export default function Home() {
             >
               Pricing
             </button>
-            <Button className="w-full bg-slate-900 py-6" onClick={() => scrollTo('contact')}>Book Demo</Button>
+            <Button className="w-full bg-slate-900 py-6 text-[12px] uppercase tracking-widest font-bold rounded-none" onClick={() => scrollTo('contact')}>Book Demo</Button>
             {user && (
               <button
                 onClick={signOut}
-                className="flex items-center gap-2 text-slate-500 text-sm font-medium"
+                className="flex items-center gap-3 text-slate-600 hover:text-slate-900 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-                Sign out ({user.email})
+                <img src={user.picture} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
+                <span className="text-sm font-semibold text-slate-900">{user.name}</span>
+                <LogOut className="w-4 h-4 ml-auto text-slate-400" />
               </button>
             )}
           </div>
@@ -375,12 +374,12 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 lg:gap-x-12 gap-y-12 lg:gap-y-20">
             {[
-              { icon: WifiOff, title: "Offline Resilience", desc: "Military-grade data persistence that operates without connectivity, syncing seamlessly when online." },
-              { icon: Zap, title: "High-Performance Billing", desc: "Engineered for high-volume environments where transaction speed is a critical business metric." },
-              { icon: BrainCircuit, title: "Neural Analytics", desc: "Advanced predictive models that transform raw transaction data into strategic growth insights." },
-              { icon: Database, title: "Edge Storage", desc: "Data is stored locally for zero-latency performance, backed by encrypted cloud redundancy." },
-              { icon: LineChart, title: "Precision Metrics", desc: "Granular, real-time visibility into every facet of your retail operation across all channels." },
-              { icon: Package, title: "Adaptive Inventory", desc: "Automated replenishment workflows and multi-node stock tracking for complex supply chains." },
+              { icon: WifiOff,      title: "Offline Resilience",          desc: "Military-grade data persistence that operates without connectivity, syncing seamlessly when online." },
+              { icon: Zap,          title: "High-Performance Billing",     desc: "Engineered for high-volume environments where transaction speed is a critical business metric." },
+              { icon: BrainCircuit, title: "Neural Analytics",             desc: "Advanced predictive models that transform raw transaction data into strategic growth insights." },
+              { icon: Database,     title: "Edge Storage",                 desc: "Data is stored locally for zero-latency performance, backed by encrypted cloud redundancy." },
+              { icon: TrendingUp,   title: "Demand Forecasting",           desc: "AI predicts future stock needs based on sales patterns, seasonality, and trends. Prevents overstocking and stockouts before they happen." },
+              { icon: Sparkles,     title: "Dynamic Pricing Intelligence", desc: "AI-driven price recommendations based on demand signals, time-of-day patterns, and inventory levels to maximise revenue." },
             ].map((feature, i) => (
               <div key={i} className="group">
                 <div className="w-12 h-12 flex items-center justify-center mb-6 md:mb-8 bg-slate-50 rounded-lg group-hover:bg-slate-900 transition-colors duration-300">
@@ -441,7 +440,7 @@ export default function Home() {
 
               <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-slate-200">
                 <p className="text-slate-400 text-sm font-medium italic">
-                  * Custom pricing available upon consultation.
+                  * <strong>Custom pricing available upon consultation.</strong>
                 </p>
               </div>
             </div>
@@ -515,7 +514,8 @@ export default function Home() {
                         name="outlet"
                         value={formData.outlet}
                         onChange={handleFormChange}
-                        placeholder="Outlet / Business Name"
+                        placeholder="Outlet / Business Name *"
+                        required
                         className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none"
                       />
                     </div>
@@ -535,7 +535,7 @@ export default function Home() {
                         name="address"
                         value={formData.address}
                         onChange={handleFormChange}
-                        placeholder="Address"
+                        placeholder="Comments / Address"
                         rows={3}
                         className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none resize-none"
                       ></textarea>

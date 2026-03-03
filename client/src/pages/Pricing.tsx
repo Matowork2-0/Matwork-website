@@ -107,6 +107,25 @@ export default function Pricing() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Scroll to top on mount — prevents inheriting scroll offset from Home
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Track pricing page visit — reuses the same log-activity endpoint as login tracking
+  useEffect(() => {
+    if (!user?.email) return;
+    fetch("/api/log-activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: user.name,
+        email: user.email,
+        action: "viewed_pricing",
+      }),
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
@@ -124,13 +143,15 @@ export default function Pricing() {
 
   return (
     <motion.div
-      className="min-h-screen bg-white font-sans"
+      className="min-h-screen bg-white font-sans selection:bg-slate-900 selection:text-white"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.21, 0.45, 0.32, 0.9] }}
     >
+      {/* Header + hero share bg-[#fafafa] so transparent nav blends in */}
+      <div className="bg-[#fafafa]">
       {/* Header */}
-      <header className={`sticky top-0 w-full z-50 transition-all duration-500 ${
+      <header className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-500 ${
         isScrolled
           ? "bg-white/90 backdrop-blur-xl border-b border-slate-100 py-3 md:py-4 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]"
           : "bg-transparent py-4 md:py-6"
@@ -249,8 +270,8 @@ export default function Pricing() {
         )}
       </header>
 
-      {/* Page hero — same bg as nav so they merge seamlessly */}
-      <div className="bg-[#fafafa] border-b border-slate-100 py-14 md:py-28 text-center px-4">
+      {/* Page hero */}
+      <div className="border-b border-slate-100 pt-32 pb-14 md:pt-48 md:pb-28 text-center px-4">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -286,13 +307,14 @@ export default function Pricing() {
                 <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">
                   ₹45,000 installation fee{" "}
-                  <span className="font-normal text-slate-500 block sm:inline">— custom pricing on consultation</span>
+                  <span className="font-normal text-slate-500">- Custom pricing available on consultation</span>
                 </p>
               </div>
             </div>
           </motion.div>
         </motion.div>
       </div>
+      </div>{/* end bg-[#fafafa] wrapper */}
 
       {/* Main content */}
       <div className="container mx-auto px-4 sm:px-6 py-10 md:py-20 max-w-5xl">
@@ -413,6 +435,49 @@ export default function Pricing() {
           </p>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white py-12 md:py-20 border-t border-slate-100">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-12">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-2.5 mb-6 md:mb-8">
+                <img src={logoImg} alt="MatoWork" className="w-8 h-8 rounded object-contain" />
+                <span className="font-heading font-bold tracking-tight text-slate-900 text-lg">MatoWork</span>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                Empowering modern retail through advanced software engineering and edge computing.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-10 md:gap-16">
+              <div>
+                <h5 className="text-[11px] uppercase tracking-widest font-bold text-slate-900 mb-4 md:mb-6">Product</h5>
+                <ul className="space-y-3 md:space-y-4">
+                  <li><a href="/#features" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Features</a></li>
+                  <li><a href="/#services" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Technology</a></li>
+                  <li><span className="text-slate-900 text-[13px] font-semibold">Pricing</span></li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="text-[11px] uppercase tracking-widest font-bold text-slate-900 mb-4 md:mb-6">Company</h5>
+                <ul className="space-y-3 md:space-y-4">
+                  <li><a href="/#about" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">About</a></li>
+                  <li><a href="/#contact" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Contact</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 md:mt-20 pt-6 md:pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-[11px] md:text-[12px] font-bold tracking-widest uppercase">
+            <p>&copy; {new Date().getFullYear()} MatoWork. All rights reserved.</p>
+            <div className="flex gap-6 md:gap-8">
+              <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </motion.div>
   );
 }
