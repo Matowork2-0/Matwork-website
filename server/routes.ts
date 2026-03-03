@@ -103,15 +103,16 @@ function validateContent(fields: { name: string; outlet: string; contact: string
     return "Please enter a valid contact number.";
   }
 
-  // Outlet checks (optional, only validate if present)
-  if (fields.outlet && fields.outlet.trim().length > 0) {
-    if (fields.outlet.trim().length > 200) return "Outlet name is too long.";
-    if (isGibberish(fields.outlet)) {
-      return "The outlet name doesn't look valid.";
-    }
-    if (containsProfanity(fields.outlet)) {
-      return "Please use appropriate language in the outlet field.";
-    }
+  // Outlet / Business Name checks (required)
+  if (!fields.outlet || fields.outlet.trim().length < 2) {
+    return "Please enter your outlet or business name (at least 2 characters).";
+  }
+  if (fields.outlet.trim().length > 200) return "Outlet name is too long.";
+  if (isGibberish(fields.outlet)) {
+    return "The outlet name doesn't look valid.";
+  }
+  if (containsProfanity(fields.outlet)) {
+    return "Please use appropriate language in the outlet field.";
   }
 
   // Address checks (optional, only validate if present)
@@ -163,13 +164,14 @@ export async function registerRoutes(
       }
 
       // Forward to Google Apps Script
-      // Column order: Name | Outlet | Contact | Address | Timestamp
+      // Column order: Name | Outlet | Contact | Address | Timestamp | Action
       const payload = {
         name: name.trim(),
         outlet: outlet?.trim() || "",
         contact: contact.trim(),
         address: address?.trim() || "",
         timestamp: new Date().toISOString(),
+        action: "Form Submitted",
       };
 
       console.log("[contact] Posting to Google Sheet URL:", sheetUrl.substring(0, 60) + "...");
