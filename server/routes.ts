@@ -164,14 +164,13 @@ export async function registerRoutes(
       }
 
       // Forward to Google Apps Script
-      // Column order: Name | Outlet | Contact | Address | Timestamp | Action
+      // Column order: Name | Outlet | Contact | Address | Timestamp
       const payload = {
         name: name.trim(),
         outlet: outlet?.trim() || "",
         contact: contact.trim(),
         address: address?.trim() || "",
         timestamp: new Date().toISOString(),
-        action: "Form Submitted",
       };
 
       console.log("[contact] Posting to Google Sheet URL:", sheetUrl.substring(0, 60) + "...");
