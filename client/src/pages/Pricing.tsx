@@ -112,20 +112,6 @@ export default function Pricing() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Track pricing page visit — reuses the same log-activity endpoint as login tracking
-  useEffect(() => {
-    if (!user?.email) return;
-    fetch("/api/log-activity", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: user.name,
-        email: user.email,
-        action: "viewed_pricing",
-      }),
-    }).catch(() => {});
-  }, []);
-
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
