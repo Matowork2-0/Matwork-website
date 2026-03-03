@@ -4,7 +4,7 @@ import {
   WifiOff,
   Zap,
   BrainCircuit,
-  Database,
+  ShieldCheck,
   TrendingUp,
   Sparkles,
   ArrowRight,
@@ -377,7 +377,7 @@ export default function Home() {
               { icon: WifiOff,      title: "Offline Resilience",          desc: "Military-grade data persistence that operates without connectivity, syncing seamlessly when online." },
               { icon: Zap,          title: "High-Performance Billing",     desc: "Engineered for high-volume environments where transaction speed is a critical business metric." },
               { icon: BrainCircuit, title: "Neural Analytics",             desc: "Advanced predictive models that transform raw transaction data into strategic growth insights." },
-              { icon: Database,     title: "Edge Storage",                 desc: "Data is stored locally for zero-latency performance, backed by encrypted cloud redundancy." },
+              { icon: ShieldCheck,  title: "Staff Activity & Oversight",   desc: "Full visibility into every staff action. Per-cashier logs, void and discount tracking, shift summaries, and alerts on suspicious patterns." },
               { icon: TrendingUp,   title: "Demand Forecasting",           desc: "AI predicts future stock needs based on sales patterns, seasonality, and trends. Prevents overstocking and stockouts before they happen." },
               { icon: Sparkles,     title: "Dynamic Pricing Intelligence", desc: "AI-driven price recommendations based on demand signals, time-of-day patterns, and inventory levels to maximise revenue." },
             ].map((feature, i) => (
