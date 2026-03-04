@@ -324,10 +324,10 @@ export default function Home() {
               </motion.div>
               <motion.h1 variants={fadeIn} className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-[1.05] tracking-tight mb-6 md:mb-8 text-slate-900">
                 The New Standard<br />
-                In <span className="text-slate-400 italic font-serif">Retail Operations.</span>
+                In <span className="text-slate-400 italic font-serif">Indian Retail.</span>
               </motion.h1>
               <motion.p variants={fadeIn} className="text-base sm:text-lg md:text-xl text-slate-500 mb-8 md:mb-12 leading-relaxed max-w-2xl mx-auto font-medium px-2">
-                Offline-first architecture meets sophisticated AI insights. MatoWork provides the infrastructure for modern, high-volume commerce environments.
+                India's AI-powered POS and billing software. Built offline-first for restaurants, retail stores, and cafes — with GST compliance, sub-50ms billing, and intelligent analytics.
               </motion.p>
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
                 <Button
@@ -356,9 +356,9 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8 mb-12 md:mb-24">
             <div className="max-w-2xl">
-              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Core Technology</h2>
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">POS Software Features</h2>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight">
-                Engineering excellence at the core of your business.
+                AI-powered POS software built for Indian retail.
               </h3>
             </div>
             <div className="pb-2">
@@ -414,7 +414,7 @@ export default function Home() {
             </div>
 
             <div className="order-1 lg:order-2">
-              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Strategic Services</h2>
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Custom Software Development</h2>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-6 md:mb-8 text-slate-900 tracking-tight leading-tight">
                 Bespoke Software<br />Architectures.
               </h3>
@@ -452,7 +452,7 @@ export default function Home() {
       <section id="about" className="py-16 md:py-32 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">About Our POS</h2>
+            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">About MatoWork POS Software</h2>
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight mb-6 md:mb-8">
               Built for retailers who<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">never stop selling.</span>
             </h3>

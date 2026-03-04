@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://matowork.netlify.app/sitemap.xml
