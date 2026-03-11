@@ -311,7 +311,7 @@ export default function Pricing() {
 
           <motion.h1
             variants={fadeIn}
-            className="mt-6 text-3xl sm:text-5xl md:text-6xl font-bold font-heading tracking-tight text-slate-900 leading-[1.05]"
+            className="mt-6 text-4xl sm:text-5xl md:text-6xl font-bold font-heading tracking-tight text-slate-900 leading-[1.02] sm:leading-[1.05]"
           >
             Simple, transparent<br />
             <span className="text-slate-400 italic font-serif">pricing.</span>
@@ -319,7 +319,7 @@ export default function Pricing() {
 
           <motion.p
             variants={fadeIn}
-            className="mt-5 text-slate-500 text-base md:text-lg font-medium max-w-xl mx-auto leading-relaxed"
+            className="mt-5 text-slate-500 text-[15px] md:text-lg font-medium max-w-xl mx-auto leading-[1.75] md:leading-relaxed"
           >
             Every plan includes the full core POS infrastructure. Scale your capabilities as your business grows.
           </motion.p>

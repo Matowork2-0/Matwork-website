@@ -322,11 +322,11 @@ export default function Home() {
                   Enterprise POS Systems
                 </span>
               </motion.div>
-              <motion.h1 variants={fadeIn} className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-[1.05] tracking-tight mb-6 md:mb-8 text-slate-900">
+              <motion.h1 variants={fadeIn} className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-[1.02] sm:leading-[1.05] tracking-tight mb-6 md:mb-8 text-slate-900">
                 The New Standard<br />
                 In <span className="text-slate-400 italic font-serif">Indian Retail.</span>
               </motion.h1>
-              <motion.p variants={fadeIn} className="text-base sm:text-lg md:text-xl text-slate-500 mb-8 md:mb-12 leading-relaxed max-w-2xl mx-auto font-medium px-2">
+              <motion.p variants={fadeIn} className="text-[15px] sm:text-lg md:text-xl text-slate-500 mb-8 md:mb-12 leading-[1.75] sm:leading-relaxed max-w-2xl mx-auto font-medium px-2">
                 India's offline-first POS and billing software for restaurants, retail stores, and cafes. GST-ready, fast billing, and clear analytics in one system.
               </motion.p>
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
