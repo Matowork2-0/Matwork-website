@@ -327,7 +327,7 @@ export default function Home() {
                 In <span className="text-slate-400 italic font-serif">Indian Retail.</span>
               </motion.h1>
               <motion.p variants={fadeIn} className="text-base sm:text-lg md:text-xl text-slate-500 mb-8 md:mb-12 leading-relaxed max-w-2xl mx-auto font-medium px-2">
-                India's AI-powered POS and billing software. Built offline-first for restaurants, retail stores, and cafes — with GST compliance, sub-50ms billing, and intelligent analytics.
+                India's offline-first POS and billing software for restaurants, retail stores, and cafes. GST-ready, fast billing, and clear analytics in one system.
               </motion.p>
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
                 <Button
@@ -457,7 +457,7 @@ export default function Home() {
               Built for retailers who<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">never stop selling.</span>
             </h3>
             <p className="text-base md:text-lg text-slate-500 leading-relaxed font-medium max-w-2xl mx-auto mb-10 md:mb-16">
-              MatoWork POS is built from the ground up for Indian retail from restaurants and cafés to grocery stores and salons. Our offline-first billing system keeps your sales running even when the internet goes down, syncing automatically when you're back online. With sub-50ms transaction speeds, real-time inventory tracking, and AI-powered sales insights, we give every business owner the tools that enterprise chains take for granted.
+              MatoWork POS is built for Indian retail, from restaurants and cafes to grocery stores and salons. It runs offline-first, so billing continues during internet outages and syncs automatically when you're back online. With fast billing, real-time inventory tracking, and AI-powered insights, it gives growing businesses the tools used by enterprise chains.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
               {[

@@ -6,6 +6,10 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[edge_functions]]
+  function = "auth-guard"
+  path = "/*"
+
 # SPA fallback — all non-file, non-function routes go to index.html
 [[redirects]]
   from = "/api/*"
