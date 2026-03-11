@@ -30,6 +30,7 @@ function DynamicMeta() {
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={Home} />
       <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />
       <Route component={NotFound} />

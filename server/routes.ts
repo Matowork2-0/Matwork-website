@@ -1,5 +1,113 @@
 import type { Express, Request, Response } from "express";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { type Server } from "http";
+
+const SESSION_COOKIE_NAME = "mw_session";
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
+type SessionPayload = {
+  email: string;
+  name: string;
+  picture: string;
+  exp: number;
+};
+
+function base64UrlEncode(input: string): string {
+  return Buffer.from(input, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function base64UrlDecode(input: string): string {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
+  return Buffer.from(padded, "base64").toString("utf8");
+}
+
+function sign(input: string, secret: string): Buffer {
+  return createHmac("sha256", secret).update(input).digest();
+}
+
+function buildSessionCookie(token: string): string {
+  const isProd = process.env.NODE_ENV === "production";
+  return [
+    `${SESSION_COOKIE_NAME}=${token}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${SESSION_TTL_SECONDS}`,
+    ...(isProd ? ["Secure"] : []),
+  ].join("; ");
+}
+
+function clearSessionCookie(): string {
+  const isProd = process.env.NODE_ENV === "production";
+  return [
+    `${SESSION_COOKIE_NAME}=`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=0",
+    ...(isProd ? ["Secure"] : []),
+  ].join("; ");
+}
+
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  if (!cookieHeader) return {};
+  return cookieHeader.split(";").reduce<Record<string, string>>((acc, part) => {
+    const [rawKey, ...rawValue] = part.trim().split("=");
+    if (!rawKey) return acc;
+    acc[rawKey] = decodeURIComponent(rawValue.join("="));
+    return acc;
+  }, {});
+}
+
+function parseList(envValue?: string): string[] {
+  if (!envValue) return [];
+  return envValue
+    .split(",")
+    .map((v) => v.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAllowedEmail(email: string): boolean {
+  const normalized = email.toLowerCase();
+  const emailAllowList = parseList(process.env.ALLOWED_LOGIN_EMAILS);
+  const domainAllowList = parseList(process.env.ALLOWED_LOGIN_DOMAINS);
+
+  if (emailAllowList.length === 0 && domainAllowList.length === 0) return true;
+  if (emailAllowList.includes(normalized)) return true;
+
+  const domain = normalized.split("@")[1] || "";
+  return domainAllowList.includes(domain);
+}
+
+function createSessionToken(payload: SessionPayload, secret: string): string {
+  const payloadPart = base64UrlEncode(JSON.stringify(payload));
+  const signaturePart = sign(payloadPart, secret).toString("hex");
+  return `${payloadPart}.${signaturePart}`;
+}
+
+function verifySessionToken(token: string, secret: string): SessionPayload | null {
+  const [payloadPart, signaturePart] = token.split(".");
+  if (!payloadPart || !signaturePart) return null;
+
+  const expectedSig = sign(payloadPart, secret);
+  const providedSig = Buffer.from(signaturePart, "hex");
+  if (providedSig.length !== expectedSig.length) return null;
+  if (!timingSafeEqual(providedSig, expectedSig)) return null;
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(payloadPart)) as SessionPayload;
+    if (!payload?.email || !payload?.exp) return null;
+    if (payload.exp * 1000 <= Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 // ── Rate Limiter (in-memory sliding window) ─────────────────────────────────
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
@@ -131,6 +239,125 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // POST /api/auth-session — verifies Google credential and sets secure session cookie.
+  app.post("/api/auth-session", async (req: Request, res: Response) => {
+    try {
+      const credential = String(req.body?.credential || "");
+      if (!credential) {
+        return res.status(400).json({ message: "Missing credential" });
+      }
+
+      const expectedClientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+      const sessionSecret = process.env.AUTH_SESSION_SECRET;
+      if (!expectedClientId || !sessionSecret) {
+        return res.status(500).json({ message: "Server config error" });
+      }
+
+      const verifyRes = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+        { method: "GET" },
+      );
+      if (!verifyRes.ok) {
+        const reason = await verifyRes.text().catch(() => "");
+        console.warn("[auth-session] Invalid Google credential:", reason.substring(0, 200));
+        return res.status(401).json({ message: "Invalid Google credential" });
+      }
+
+      const tokenInfo: any = await verifyRes.json();
+      const issuer = String(tokenInfo.iss || "");
+      const audience = String(tokenInfo.aud || "");
+      const exp = Number(tokenInfo.exp || 0);
+      const email = String(tokenInfo.email || "");
+      const emailVerified = String(tokenInfo.email_verified || "") === "true";
+
+      if (!email || !emailVerified) {
+        return res.status(403).json({ message: "Google account email is not verified" });
+      }
+      if (audience !== expectedClientId) {
+        return res.status(401).json({ message: "Google client mismatch" });
+      }
+      if (!["https://accounts.google.com", "accounts.google.com"].includes(issuer)) {
+        return res.status(401).json({ message: "Invalid Google issuer" });
+      }
+      if (!exp || exp * 1000 <= Date.now()) {
+        return res.status(401).json({ message: "Google token expired" });
+      }
+      if (!isAllowedEmail(email)) {
+        return res.status(403).json({ message: "Your account is not allowed to access this site" });
+      }
+
+      const payload: SessionPayload = {
+        email,
+        name: String(tokenInfo.name || ""),
+        picture: String(tokenInfo.picture || "/favicon.png"),
+        exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
+      };
+
+      const sessionToken = createSessionToken(payload, sessionSecret);
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionToken));
+
+      const logUrl = process.env.GOOGLE_ACTIVITY_LOG_URL;
+      if (logUrl) {
+        fetch(logUrl, {
+          method: "POST",
+          body: JSON.stringify({
+            timestamp: new Date().toISOString(),
+            name: payload.name,
+            email: payload.email,
+            action: "login",
+          }),
+          redirect: "follow",
+        }).catch(() => {});
+      }
+
+      return res.status(200).json({
+        ok: true,
+        user: {
+          email: payload.email,
+          name: payload.name,
+          picture: payload.picture,
+        },
+      });
+    } catch (err: any) {
+      console.error("[auth-session] Error:", err?.message || err);
+      return res.status(500).json({ message: "Sign-in failed" });
+    }
+  });
+
+  // GET /api/auth-me — returns current session user from HttpOnly cookie.
+  app.get("/api/auth-me", async (req: Request, res: Response) => {
+    const sessionSecret = process.env.AUTH_SESSION_SECRET;
+    if (!sessionSecret) {
+      return res.status(500).json({ message: "Server config error" });
+    }
+
+    const cookies = parseCookies(req.headers.cookie);
+    const token = cookies[SESSION_COOKIE_NAME];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthenticated" });
+    }
+
+    const payload = verifySessionToken(token, sessionSecret);
+    if (!payload) {
+      return res.status(401).json({ message: "Unauthenticated" });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      user: {
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      },
+    });
+  });
+
+  // POST /api/auth-logout — clears session cookie.
+  app.post("/api/auth-logout", async (_req: Request, res: Response) => {
+    res.setHeader("Set-Cookie", clearSessionCookie());
+    return res.status(200).json({ ok: true });
+  });
+
   // POST /api/contact — secure proxy to Google Sheets
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {

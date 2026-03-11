@@ -1,36 +1,72 @@
 import { useState, useEffect } from "react";
 import { GoogleLogin, googleLogout } from "@react-oauth/google";
 
-const STORAGE_KEY = "mw_google_credential";
+const USER_STORAGE_KEY = "mw_user_info";
 
-function decodeJwt(token: string): Record<string, any> | null {
+type SessionUser = { name: string; email: string; picture: string };
+
+function readStoredUser(): SessionUser | null {
   try {
-    return JSON.parse(atob(token.split(".")[1]));
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SessionUser;
+    if (!parsed?.email) return null;
+    return {
+      name: parsed.name || "",
+      email: parsed.email || "",
+      picture: parsed.picture || "/favicon.png",
+    };
   } catch {
     return null;
   }
 }
 
-function isSessionValid(): boolean {
-  const credential = localStorage.getItem(STORAGE_KEY);
-  if (!credential) return false;
-  const payload = decodeJwt(credential);
-  if (!payload) return false;
-  return payload.exp * 1000 > Date.now();
+function storeUser(user: SessionUser) {
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
 }
 
-export function getUserInfo(): { name: string; email: string; picture: string } | null {
-  const credential = localStorage.getItem(STORAGE_KEY);
-  if (!credential) return null;
-  const payload = decodeJwt(credential);
-  if (!payload) return null;
-  return { name: payload.name, email: payload.email, picture: payload.picture };
+function clearStoredUser() {
+  localStorage.removeItem(USER_STORAGE_KEY);
 }
 
-export function signOut() {
+async function fetchSessionUser(): Promise<SessionUser | null> {
+  try {
+    const res = await fetch("/api/auth-me", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    if (!data?.user?.email) return null;
+
+    return {
+      name: data.user.name || "",
+      email: data.user.email || "",
+      picture: data.user.picture || "/favicon.png",
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getUserInfo(): SessionUser | null {
+  return readStoredUser();
+}
+
+export async function signOut() {
+  try {
+    await fetch("/api/auth-logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // no-op: still perform local signout
+  }
+
   googleLogout();
-  localStorage.removeItem(STORAGE_KEY);
-  window.location.reload();
+  clearStoredUser();
+  window.location.href = "/login";
 }
 
 interface AuthGateProps {
@@ -41,11 +77,35 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
-    setIsAuthenticated(isSessionValid());
-    setLoading(false);
+    let active = true;
+
+    (async () => {
+      const user = await fetchSessionUser();
+      if (!active) return;
+
+      if (user) {
+        storeUser(user);
+        setIsAuthenticated(true);
+      } else {
+        clearStoredUser();
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
+    })();
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && window.location.pathname === "/login") {
+      window.location.replace("/");
+    }
+  }, [isAuthenticated]);
 
   if (loading) return null;
 
@@ -69,24 +129,41 @@ export default function AuthGate({ children }: AuthGateProps) {
 
         <div className="bg-white border border-slate-100 rounded-sm shadow-sm p-8 w-full max-w-sm flex flex-col items-center gap-4">
           <GoogleLogin
-            onSuccess={(response) => {
-              if (response.credential) {
-                localStorage.setItem(STORAGE_KEY, response.credential);
-                setIsAuthenticated(true);
-                setError("");
-                // Log login activity — fire-and-forget, never blocks the user
-                const payload = decodeJwt(response.credential);
-                if (payload) {
-                  fetch("/api/log-activity", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      name: payload.name || "",
-                      email: payload.email || "",
-                      action: "login",
-                    }),
-                  }).catch(() => {});
+            onSuccess={async (response) => {
+              if (!response.credential) {
+                setError("Sign-in failed. Missing credential.");
+                return;
+              }
+
+              setAuthenticating(true);
+              setError("");
+              try {
+                const res = await fetch("/api/auth-session", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ credential: response.credential }),
+                });
+
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data?.user?.email) {
+                  setError(data?.message || "Sign-in failed. Please try again.");
+                  return;
                 }
+
+                storeUser({
+                  name: data.user.name || "",
+                  email: data.user.email || "",
+                  picture: data.user.picture || "/favicon.png",
+                });
+                setIsAuthenticated(true);
+
+                const next = new URLSearchParams(window.location.search).get("next");
+                window.location.href = next && next.startsWith("/") ? next : "/";
+              } catch {
+                setError("Sign-in failed. Please try again.");
+              } finally {
+                setAuthenticating(false);
               }
             }}
             onError={() => setError("Sign-in failed. Please try again.")}
@@ -96,6 +173,9 @@ export default function AuthGate({ children }: AuthGateProps) {
             text="signin_with"
             width="280"
           />
+          {authenticating && (
+            <p className="text-slate-500 text-sm font-medium">Verifying account...</p>
+          )}
           {error && (
             <p className="text-red-500 text-sm font-medium">{error}</p>
           )}

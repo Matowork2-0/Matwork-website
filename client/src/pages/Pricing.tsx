@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Check, Minus, LogOut, Wrench, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,27 +17,35 @@ const staggerContainer = {
   visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
 
+type BillingCycle = "monthly" | "yearly";
+
 const plans = [
   {
     name: "Starter",
-    price: "₹18,000",
-    period: "/month",
+    monthlyPrice: "₹1,999",
+    yearlyPrice: "₹19,990",
+    monthlyPeriod: "/month",
+    yearlyPeriod: "/year",
     description: "Perfect for single-outlet businesses ready to modernize operations.",
     badge: null,
     highlight: false,
   },
   {
     name: "Growth",
-    price: "₹45,000",
-    period: "/month",
+    monthlyPrice: "₹3,999",
+    yearlyPrice: "₹39,990",
+    monthlyPeriod: "/month",
+    yearlyPeriod: "/year",
     description: "For growing businesses that need smarter tools and connectivity.",
     badge: "Most Popular",
     highlight: true,
   },
   {
     name: "Enterprise",
-    price: "₹92,000",
-    period: "/month",
+    monthlyPrice: "₹7,999",
+    yearlyPrice: "₹79,990",
+    monthlyPeriod: "/month",
+    yearlyPeriod: "/year",
     description: "Full-scale AI and automation for multi-outlet operations.",
     badge: null,
     highlight: false,
@@ -91,6 +99,28 @@ const featureGroups: FeatureGroup[] = [
   },
 ];
 
+const FEATURE_PREVIEW_LIMIT = 10;
+
+function getFeatureGroupsPreview(groups: FeatureGroup[], limit: number): FeatureGroup[] {
+  const preview: FeatureGroup[] = [];
+  let remaining = limit;
+
+  for (const group of groups) {
+    if (remaining <= 0) break;
+
+    const visibleFeatures = group.features.slice(0, remaining);
+    if (visibleFeatures.length > 0) {
+      preview.push({
+        group: group.group,
+        features: visibleFeatures,
+      });
+      remaining -= visibleFeatures.length;
+    }
+  }
+
+  return preview;
+}
+
 function Cell({ value }: { value: CellValue }) {
   if (value === "YES") return <Check className="w-4 h-4 text-slate-900 mx-auto" strokeWidth={2.5} />;
   if (value === "NO")  return <Minus className="w-4 h-4 text-slate-200 mx-auto" strokeWidth={2} />;
@@ -106,6 +136,15 @@ export default function Pricing() {
   const user = getUserInfo();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [showFullComparison, setShowFullComparison] = useState(false);
+
+  const totalFeatureCount = featureGroups.reduce((sum, group) => sum + group.features.length, 0);
+  const displayedFeatureGroups = showFullComparison
+    ? featureGroups
+    : getFeatureGroupsPreview(featureGroups, FEATURE_PREVIEW_LIMIT);
+  const displayedFeatureCount = displayedFeatureGroups.reduce((sum, group) => sum + group.features.length, 0);
+  const hasHiddenFeatures = displayedFeatureCount < totalFeatureCount;
 
   // Scroll to top on mount — prevents inheriting scroll offset from Home
   useEffect(() => {
@@ -285,6 +324,44 @@ export default function Pricing() {
             Every plan includes the full core POS infrastructure. Scale your capabilities as your business grows.
           </motion.p>
 
+          <motion.div variants={fadeIn} className="mt-8 flex flex-col items-center gap-2">
+            <div
+              className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
+              role="tablist"
+              aria-label="Billing cycle"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billingCycle === "monthly"}
+                onClick={() => setBillingCycle("monthly")}
+                className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
+                  billingCycle === "monthly"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billingCycle === "yearly"}
+                onClick={() => setBillingCycle("yearly")}
+                className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
+                  billingCycle === "yearly"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                Yearly
+              </button>
+            </div>
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">
+              Annual billing saves ~2 months
+            </p>
+          </motion.div>
+
           {/* Installation fee callout */}
           <motion.div variants={fadeIn} className="mt-8 flex justify-center">
             <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm text-center sm:text-left">
@@ -292,7 +369,7 @@ export default function Pricing() {
               <div>
                 <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
                 <p className="text-sm font-semibold text-slate-900 mt-0.5">
-                  ₹45,000 installation fee{" "}
+                  ₹12,000 installation fee{" "}
                   <span className="font-normal text-slate-500">- Custom pricing available on consultation</span>
                 </p>
               </div>
@@ -330,10 +407,10 @@ export default function Pricing() {
                 {plan.name}
               </p>
               <p className={`text-3xl md:text-4xl font-bold font-heading tracking-tight ${i === 2 ? "text-white" : "text-slate-900"}`}>
-                {plan.price}
+                {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
               </p>
               <p className={`text-xs font-medium mt-1 ${i === 2 ? "text-slate-400" : "text-slate-400"}`}>
-                {plan.period}
+                {billingCycle === "monthly" ? plan.monthlyPeriod : plan.yearlyPeriod}
               </p>
               <p className={`text-[12px] leading-relaxed mt-3 mb-0 flex-1 ${i === 2 ? "text-slate-400" : "text-slate-500"}`}>
                 {plan.description}
@@ -370,9 +447,9 @@ export default function Pricing() {
               </tr>
             </thead>
             <tbody>
-              {featureGroups.map((group) => (
-                <>
-                  <tr key={`group-${group.group}`} className="bg-slate-50 border-b border-t border-slate-100">
+              {displayedFeatureGroups.map((group) => (
+                <Fragment key={`group-${group.group}`}>
+                  <tr className="bg-slate-50 border-b border-t border-slate-100">
                     <td
                       colSpan={4}
                       className="py-2.5 px-4 sm:px-5 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400"
@@ -395,11 +472,23 @@ export default function Pricing() {
                       ))}
                     </tr>
                   ))}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
         </div>
+
+        {(hasHiddenFeatures || showFullComparison) && (
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setShowFullComparison((prev) => !prev)}
+              className="inline-flex items-center justify-center px-4 py-2 text-[11px] uppercase tracking-widest font-semibold text-slate-700 border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+            >
+              {showFullComparison ? "Show Fewer Features" : `Show Full Comparison (${totalFeatureCount} Features)`}
+            </button>
+          </div>
+        )}
 
         {/* Bottom CTA */}
         <div className="mt-14 border border-slate-100 rounded-sm bg-[#fafafa] px-6 sm:px-8 py-10 text-center">
@@ -417,7 +506,7 @@ export default function Pricing() {
             Book a Demo
           </Button>
           <p className="mt-4 text-slate-400 text-xs font-medium">
-            One-time installation: ₹45,000 &middot; Custom rates on consultation
+            One-time installation: ₹12,000 &middot; Custom rates on consultation
           </p>
         </div>
       </div>
