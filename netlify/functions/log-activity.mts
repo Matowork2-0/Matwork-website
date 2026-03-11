@@ -42,12 +42,16 @@ export default async (req: Request, _context: Context) => {
 
         const res = await fetch(logUrl, {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
             redirect: "follow",
         });
 
         const resText = await res.text().catch(() => "");
         console.log("[log-activity] Sheet response:", res.status, resText.substring(0, 200));
+        if (!res.ok) {
+            console.warn("[log-activity] Sheet endpoint returned non-2xx.");
+        }
 
         // Non-critical — return 200 regardless so the UI is never blocked
         return new Response(JSON.stringify({ ok: true }), {

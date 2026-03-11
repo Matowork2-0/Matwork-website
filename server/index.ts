@@ -2,6 +2,69 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import fs from "node:fs";
+import path from "node:path";
+
+function loadEnvFileIfPresent(filePath: string) {
+  if (!fs.existsSync(filePath)) return;
+
+  const content = fs.readFileSync(filePath, "utf8");
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+
+    const normalized = line.startsWith("export ") ? line.slice(7).trim() : line;
+    const separatorIndex = normalized.indexOf("=");
+    if (separatorIndex <= 0) continue;
+
+    const key = normalized.slice(0, separatorIndex).trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+
+    let value = normalized.slice(separatorIndex + 1).trim();
+    const hasMatchingQuotes =
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"));
+    if (hasMatchingQuotes && value.length >= 2) {
+      value = value.slice(1, -1);
+    }
+
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+function loadLocalEnv() {
+  const cwd = process.cwd();
+  const candidates = [
+    path.join(cwd, ".env"),
+    path.join(cwd, ".env.local"),
+    path.join(cwd, "client", ".env"),
+    path.join(cwd, "client", ".env.local"),
+  ];
+
+  for (const filePath of candidates) {
+    loadEnvFileIfPresent(filePath);
+  }
+}
+
+function warnMissingRuntimeEnv() {
+  const required = [
+    "AUTH_SESSION_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "VITE_GOOGLE_CLIENT_ID",
+    "GOOGLE_SHEET_URL",
+    "GOOGLE_ACTIVITY_LOG_URL",
+  ];
+
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    console.warn(`[config] Missing env vars: ${missing.join(", ")}`);
+  }
+}
+
+loadLocalEnv();
+warnMissingRuntimeEnv();
 
 const app = express();
 const httpServer = createServer(app);
