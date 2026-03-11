@@ -167,9 +167,12 @@ export default async (req: Request, _context: Context) => {
     headers.append("Set-Cookie", buildSessionCookie(sessionToken));
 
     const logUrl = process.env.GOOGLE_ACTIVITY_LOG_URL;
-    if (logUrl) {
-      fetch(logUrl, {
+    if (!logUrl) {
+      console.warn("[auth-session] GOOGLE_ACTIVITY_LOG_URL is not set. Login activity not logged.");
+    } else {
+      void fetch(logUrl, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
           name: user.name,
@@ -177,7 +180,17 @@ export default async (req: Request, _context: Context) => {
           action: "login",
         }),
         redirect: "follow",
-      }).catch(() => {});
+      })
+        .then(async (logRes) => {
+          if (logRes.ok) return;
+          const reason = await logRes.text().catch(() => "");
+          console.warn(
+            `[auth-session] Login activity log failed: ${logRes.status} ${reason.substring(0, 200)}`,
+          );
+        })
+        .catch((logErr: any) => {
+          console.error("[auth-session] Login activity request error:", logErr?.message || logErr);
+        });
     }
 
     return new Response(JSON.stringify({ ok: true, user }), {
