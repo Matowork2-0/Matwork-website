@@ -83,7 +83,7 @@ const featureGroups: FeatureGroup[] = [
   {
     group: "Reliability & Connectivity",
     features: [
-      { name: "Fault-Tolerant System Design",                           values: ["NO", "YES", "YES"] },
+      { name: "Fault-Tolerant System Design",                           values: ["YES", "YES", "YES"] },
       { name: "Open Connectivity Framework",                            values: ["NO", "YES", "YES"] },
       { name: "Automatic Error Recovery",                               values: ["NO", "NO", "YES"] },
     ],
@@ -94,7 +94,7 @@ const featureGroups: FeatureGroup[] = [
       { name: "Enterprise-Grade Multi-Outlet Management",               values: ["NO", "YES", "YES"] },
       { name: "Advanced Customer Intelligence & CRM Engine",            values: ["NO", "NO", "YES"] },
       { name: "Automated Operational Monitoring & Optimization",        values: ["NO", "YES", "YES"] },
-      { name: "Scalable Architecture & Business Expansion",             values: ["NO", "NO", "YES"] },
+      { name: "Scalable Architecture & Business Expansion",             values: ["NO", "YES", "YES"] },
     ],
   },
   {
