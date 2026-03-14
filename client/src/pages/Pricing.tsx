@@ -97,6 +97,13 @@ const featureGroups: FeatureGroup[] = [
       { name: "Scalable Architecture & Business Expansion",             values: ["NO", "NO", "YES"] },
     ],
   },
+  {
+    group: "Customer Loyalty & Insights",
+    features: [
+      { name: "Smart Loyalty & Rewards Program",                        values: ["NO", "YES", "YES"] },
+      { name: "Cross-Outlet Customer Spending Intelligence",            values: ["NO", "NO", "YES"] },
+    ],
+  },
 ];
 
 const FEATURE_PREVIEW_LIMIT = 10;
