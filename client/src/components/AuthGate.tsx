@@ -157,9 +157,6 @@ export default function AuthGate({ children }: AuthGateProps) {
                   picture: data.user.picture || "/favicon.png",
                 });
                 setIsAuthenticated(true);
-
-                const next = new URLSearchParams(window.location.search).get("next");
-                window.location.href = next && next.startsWith("/") ? next : "/";
               } catch {
                 setError("Sign-in failed. Please try again.");
               } finally {
