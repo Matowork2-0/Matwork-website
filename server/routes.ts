@@ -442,5 +442,70 @@ export async function registerRoutes(
     }
   });
 
+  // POST /api/log-visit — log page visits to Google Sheets
+  app.post("/api/log-visit", async (req: Request, res: Response) => {
+    try {
+      const body = req.body;
+      const sheetUrl = process.env.GOOGLE_SHEET_URL;
+
+      if (!sheetUrl) {
+        console.error("[log-visit] GOOGLE_SHEET_URL is not set.");
+        return res.status(500).json({ ok: false });
+      }
+
+      const ua = String(body.userAgent || "");
+      let device = "Unknown";
+      if (/Mobile|Android|iPhone|iPad/i.test(ua)) {
+        device = /iPad/i.test(ua) ? "Tablet" : "Mobile";
+      } else {
+        device = "Desktop";
+      }
+      let os = "Unknown";
+      if (/Windows/i.test(ua)) os = "Windows";
+      else if (/Mac OS/i.test(ua)) os = "macOS";
+      else if (/Android/i.test(ua)) os = "Android";
+      else if (/iPhone|iPad/i.test(ua)) os = "iOS";
+      else if (/Linux/i.test(ua)) os = "Linux";
+
+      let browser = "Unknown";
+      if (/Edg\//i.test(ua)) browser = "Edge";
+      else if (/Chrome/i.test(ua)) browser = "Chrome";
+      else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+      else if (/Firefox/i.test(ua)) browser = "Firefox";
+
+      const clientIp =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        "unknown";
+
+      const payload = {
+        action: "visit",
+        timestamp: body.timestamp || new Date().toISOString(),
+        page: body.page || "",
+        ip: clientIp,
+        device: `${device} — ${os} — ${browser}`,
+        screen: body.screen || "",
+        referrer: body.referrer || "",
+        language: body.language || "",
+      };
+
+      console.log("[log-visit] Sending payload:", JSON.stringify(payload));
+
+      const sheetRes = await fetch(sheetUrl, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        redirect: "follow",
+      });
+
+      const sheetBody = await sheetRes.text().catch(() => "");
+      console.log("[log-visit] Google Sheets response:", sheetRes.status, sheetBody.substring(0, 500));
+
+      return res.status(200).json({ ok: true });
+    } catch (err: any) {
+      console.error("[log-visit] Error:", err?.message || err);
+      return res.status(500).json({ ok: false });
+    }
+  });
+
   return httpServer;
 }
