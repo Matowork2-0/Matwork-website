@@ -53,7 +53,6 @@ export default async (req: Request, context: Context) => {
 
     await fetch(sheetUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       redirect: "follow",
     });
