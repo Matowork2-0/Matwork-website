@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, LogOut, Wrench, Menu, X } from "lucide-react";
+import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
@@ -17,6 +17,7 @@ const staggerContainer = {
   visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
 
+type PricingModel = "subscription" | "standalone" | "per-feature";
 type BillingCycle = "monthly" | "yearly";
 
 const plans = [
@@ -26,7 +27,9 @@ const plans = [
     yearlyPrice: "₹19,990",
     monthlyPeriod: "/month",
     yearlyPeriod: "/year",
-    description: "Perfect for single-outlet businesses ready to modernize operations.",
+    yearlySaving: "Save ₹4,000",
+    idealFor: "Single outlet",
+    description: "Perfect for single-outlet businesses ready to take control.",
     badge: null,
     highlight: false,
   },
@@ -36,7 +39,9 @@ const plans = [
     yearlyPrice: "₹39,990",
     monthlyPeriod: "/month",
     yearlyPeriod: "/year",
-    description: "For growing businesses that need smarter tools and connectivity.",
+    yearlySaving: "Save ₹8,000",
+    idealFor: "2–5 outlets",
+    description: "For growing businesses that need visibility across locations.",
     badge: "Most Popular",
     highlight: true,
   },
@@ -46,9 +51,46 @@ const plans = [
     yearlyPrice: "₹79,990",
     monthlyPeriod: "/month",
     yearlyPeriod: "/year",
-    description: "Full-scale AI and automation for multi-outlet operations.",
+    yearlySaving: "Save ₹16,000",
+    idealFor: "Multi-location chain",
+    description: "Full-scale AI and control for multi-outlet operations.",
     badge: null,
     highlight: false,
+  },
+];
+
+const standalonePlans = [
+  {
+    tier: "Starter",
+    outlets: "1 outlet",
+    license: "₹75,000",
+    setup: "₹45,000",
+    total: "₹1,20,000",
+    amc: "₹24,000 / outlet",
+  },
+  {
+    tier: "Growth",
+    outlets: "2–5 outlets",
+    license: "₹1,50,000 (2 outlets)\n+ ₹25,000 / extra",
+    setup: "₹75,000 (2 outlets)\n+ ₹15,000 / extra",
+    total: "₹2,25,000\n(2 outlets)",
+    amc: "₹30,000 / outlet",
+  },
+  {
+    tier: "Enterprise",
+    outlets: "6–20 outlets",
+    license: "₹4,00,000 (6 outlets)\n+ ₹20,000 / extra",
+    setup: "₹1,50,000 (6 outlets)\n+ ₹12,500 / extra",
+    total: "₹5,50,000\n(6 outlets)",
+    amc: "₹42,000 / outlet",
+  },
+  {
+    tier: "Enterprise Plus",
+    outlets: "20+ outlets",
+    license: "₹8,00,000 starting\n+ ₹30,000 / outlet",
+    setup: "₹3,00,000 starting\n+ ₹10,000 / outlet",
+    total: "Custom",
+    amc: "₹60,000 / outlet",
   },
 ];
 
@@ -61,47 +103,31 @@ type FeatureGroup = {
 
 const featureGroups: FeatureGroup[] = [
   {
-    group: "Core Platform",
+    group: "Core Control",
     features: [
-      { name: "Offline-First System Architecture",                      values: ["YES", "YES", "YES"] },
-      { name: "Real-Time Operational Analytics & Business Intelligence", values: ["YES", "YES", "YES"] },
-      { name: "High-Performance Billing Engine",                        values: ["YES", "YES", "YES"] },
-      { name: "Multi-Device Synchronization",                           values: ["YES", "YES", "YES"] },
-      { name: "Intelligent Inventory Management",                       values: ["YES", "YES", "YES"] },
-      { name: "Enterprise Security Layer",                              values: ["YES", "YES", "YES"] },
-      { name: "Productivity-Optimized User Interface",                  values: ["YES", "YES", "YES"] },
+      { name: "Always-On — Works Without Internet",       values: ["YES", "YES", "YES"] },
+      { name: "Live Profit Visibility",                   values: ["YES", "YES", "YES"] },
+      { name: "Billing Anomaly Detection & Fraud Flagging", values: ["YES", "YES", "YES"] },
+      { name: "Owner View — Any Device, Anywhere",        values: ["YES", "YES", "YES"] },
+      { name: "Waste & Pilferage Tracking",               values: ["YES", "YES", "YES"] },
+      { name: "Full Data Ownership",                      values: ["YES", "YES", "YES"] },
+      { name: "One Dashboard for Everything",             values: ["YES", "YES", "YES"] },
     ],
   },
   {
     group: "Intelligence & AI",
     features: [
-      { name: "AI-Powered Order Intelligence",                          values: ["NO", "Basic AI", "Advanced AI"] },
-      { name: "Predictive AI Evolution Suite",                          values: ["NO", "NO", "YES"] },
-      { name: "Voice Integration for Owner Dashboard",                  values: ["NO", "NO", "YES"] },
+      { name: "AI Anomaly Detection",                     values: ["NO", "Basic AI", "Advanced AI"] },
+      { name: "Cross-Outlet Anomaly Comparison",          values: ["NO", "YES", "YES"] },
+      { name: "Customer Spend & Retention Tracking",      values: ["NO", "YES", "YES"] },
     ],
   },
   {
-    group: "Reliability & Connectivity",
+    group: "Enterprise Intelligence",
     features: [
-      { name: "Fault-Tolerant System Design",                           values: ["YES", "YES", "YES"] },
-      { name: "Open Connectivity Framework",                            values: ["NO", "YES", "YES"] },
-      { name: "Automatic Error Recovery",                               values: ["NO", "NO", "YES"] },
-    ],
-  },
-  {
-    group: "Enterprise Scale",
-    features: [
-      { name: "Enterprise-Grade Multi-Outlet Management",               values: ["NO", "YES", "YES"] },
-      { name: "Advanced Customer Intelligence & CRM Engine",            values: ["NO", "NO", "YES"] },
-      { name: "Automated Operational Monitoring & Optimization",        values: ["NO", "YES", "YES"] },
-      { name: "Scalable Architecture & Business Expansion",             values: ["NO", "YES", "YES"] },
-    ],
-  },
-  {
-    group: "Customer Loyalty & Insights",
-    features: [
-      { name: "Smart Loyalty & Rewards Program",                        values: ["NO", "YES", "YES"] },
-      { name: "Cross-Outlet Customer Spending Intelligence",            values: ["NO", "NO", "YES"] },
+      { name: "Customer Profitability Analysis",          values: ["NO", "NO", "YES"] },
+      { name: "Predictive Demand & Cost Alerts",          values: ["NO", "NO", "YES"] },
+      { name: "Voice Owner Dashboard",                    values: ["NO", "NO", "YES"] },
     ],
   },
 ];
@@ -138,11 +164,36 @@ function Cell({ value }: { value: CellValue }) {
   );
 }
 
+const pricingModels: { id: PricingModel; label: string; icon: typeof ShoppingBag; tagline: string; desc: string }[] = [
+  {
+    id: "subscription",
+    label: "Subscription",
+    icon: RefreshCw,
+    tagline: "Grow Your Visibility",
+    desc: "Start lean and scale as you grow. Monthly or annual plans with complete control from day one.",
+  },
+  {
+    id: "standalone",
+    label: "Standalone",
+    icon: ShoppingBag,
+    tagline: "Own the Control Layer",
+    desc: "Buy the licence outright and own it permanently. Full visibility, zero recurring fees.",
+  },
+  {
+    id: "per-feature",
+    label: "Per-Feature",
+    icon: Layers,
+    tagline: "Layer It In",
+    desc: "Already have a POS or ERP? Add our control layer on top — plug in only the modules you need.",
+  },
+];
+
 export default function Pricing() {
   const [, navigate] = useLocation();
   const user = getUserInfo();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pricingModel, setPricingModel] = useState<PricingModel>("subscription");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [showFullComparison, setShowFullComparison] = useState(false);
 
@@ -153,7 +204,6 @@ export default function Pricing() {
   const displayedFeatureCount = displayedFeatureGroups.reduce((sum, group) => sum + group.features.length, 0);
   const hasHiddenFeatures = displayedFeatureCount < totalFeatureCount;
 
-  // Scroll to top on mount — prevents inheriting scroll offset from Home
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -328,58 +378,33 @@ export default function Pricing() {
             variants={fadeIn}
             className="mt-5 text-slate-500 text-[15px] md:text-lg font-medium max-w-xl mx-auto leading-[1.75] md:leading-relaxed"
           >
-            Every plan includes the full core POS infrastructure. Scale your capabilities as your business grows.
+            Every plan includes the full core control layer. Scale your visibility as your business grows.
           </motion.p>
 
-          <motion.div variants={fadeIn} className="mt-8 flex flex-col items-center gap-2">
-            <div
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
-              role="tablist"
-              aria-label="Billing cycle"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={billingCycle === "monthly"}
-                onClick={() => setBillingCycle("monthly")}
-                className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
-                  billingCycle === "monthly"
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={billingCycle === "yearly"}
-                onClick={() => setBillingCycle("yearly")}
-                className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
-                  billingCycle === "yearly"
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                Yearly
-              </button>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">
-              Annual billing saves ~2 months
-            </p>
-          </motion.div>
-
-          {/* Installation fee callout */}
-          <motion.div variants={fadeIn} className="mt-8 flex justify-center">
-            <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm text-center sm:text-left">
-              <Wrench className="w-4 h-4 text-slate-500 shrink-0" />
-              <div>
-                <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
-                <p className="text-sm font-semibold text-slate-900 mt-0.5">
-                  ₹12,000 installation fee{" "}
-                  <span className="font-normal text-slate-500">- Custom pricing available on consultation</span>
-                </p>
-              </div>
+          {/* Pricing model selector */}
+          <motion.div variants={fadeIn} className="mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
+              {pricingModels.map((model) => {
+                const Icon = model.icon;
+                const isActive = pricingModel === model.id;
+                return (
+                  <button
+                    key={model.id}
+                    onClick={() => setPricingModel(model.id)}
+                    className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-sm border transition-all text-center ${
+                      isActive
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} strokeWidth={1.5} />
+                    <span className="text-[11px] uppercase tracking-widest font-bold">{model.label}</span>
+                    <span className={`text-[10px] font-medium leading-snug ${isActive ? "text-slate-300" : "text-slate-400"}`}>
+                      {model.tagline}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
         </motion.div>
@@ -389,56 +414,190 @@ export default function Pricing() {
       {/* Main content */}
       <div className="container mx-auto px-4 sm:px-6 py-10 md:py-20 max-w-5xl">
 
-        {/* Plan cards — stack on mobile, 3-col on md+ */}
-        <div className="grid grid-cols-1 gap-y-8 md:grid-cols-3 md:gap-4 mb-1">
-          {plans.map((plan, i) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-sm p-6 md:p-8 text-center flex flex-col ${
-                i === 2
-                  ? "bg-slate-900 text-white"
-                  : plan.highlight
-                  ? "bg-white border-2 border-slate-900"
-                  : "bg-white border border-slate-200"
-              }`}
-            >
-              {plan.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm whitespace-nowrap">
-                    {plan.badge}
-                  </span>
-                </div>
-              )}
-
-              <p className={`text-[11px] uppercase tracking-[0.25em] font-bold mb-2 ${i === 2 ? "text-slate-400" : "text-slate-400"}`}>
-                {plan.name}
-              </p>
-              <p className={`text-3xl md:text-4xl font-bold font-heading tracking-tight ${i === 2 ? "text-white" : "text-slate-900"}`}>
-                {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
-              </p>
-              <p className={`text-xs font-medium mt-1 ${i === 2 ? "text-slate-400" : "text-slate-400"}`}>
-                {billingCycle === "monthly" ? plan.monthlyPeriod : plan.yearlyPeriod}
-              </p>
-              <p className={`text-[12px] leading-relaxed mt-3 mb-0 flex-1 ${i === 2 ? "text-slate-400" : "text-slate-500"}`}>
-                {plan.description}
-              </p>
-              <Button
-                onClick={() => { window.location.href = "/#contact"; }}
-                className={`mt-5 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
-                  i === 2
-                    ? "bg-white text-slate-900 hover:bg-slate-100"
-                    : plan.highlight
-                    ? "bg-slate-900 text-white hover:bg-slate-700"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
-                }`}
+        {/* ── SUBSCRIPTION MODEL ── */}
+        {pricingModel === "subscription" && (
+          <>
+            {/* Billing cycle toggle */}
+            <div className="flex flex-col items-center gap-2 mb-10">
+              <div
+                className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
+                role="tablist"
+                aria-label="Billing cycle"
               >
-                Get Started
-              </Button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === "monthly"}
+                  onClick={() => setBillingCycle("monthly")}
+                  className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
+                    billingCycle === "monthly"
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === "yearly"}
+                  onClick={() => setBillingCycle("yearly")}
+                  className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
+                    billingCycle === "yearly"
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  Yearly
+                </button>
+              </div>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">
+                Annual billing saves ~2 months
+              </p>
             </div>
-          ))}
-        </div>
 
-        {/* Feature comparison table — horizontally scrollable on mobile */}
+            {/* Plan cards */}
+            <div className="grid grid-cols-1 gap-y-8 md:grid-cols-3 md:gap-4 mb-1">
+              {plans.map((plan, i) => (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-sm p-6 md:p-8 text-center flex flex-col ${
+                    i === 2
+                      ? "bg-slate-900 text-white"
+                      : plan.highlight
+                      ? "bg-white border-2 border-slate-900"
+                      : "bg-white border border-slate-200"
+                  }`}
+                >
+                  {plan.badge && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <span className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm whitespace-nowrap">
+                        {plan.badge}
+                      </span>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] uppercase tracking-[0.25em] font-bold mb-2 text-slate-400">
+                    {plan.name}
+                  </p>
+                  <p className={`text-3xl md:text-4xl font-bold font-heading tracking-tight ${i === 2 ? "text-white" : "text-slate-900"}`}>
+                    {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                  </p>
+                  <p className="text-xs font-medium mt-1 text-slate-400">
+                    {billingCycle === "monthly" ? plan.monthlyPeriod : plan.yearlyPeriod}
+                  </p>
+                  {billingCycle === "yearly" && (
+                    <p className="text-[10px] font-bold mt-1 text-emerald-500 uppercase tracking-wider">
+                      {plan.yearlySaving}
+                    </p>
+                  )}
+                  <p className={`text-[11px] uppercase tracking-widest font-semibold mt-2 ${i === 2 ? "text-slate-400" : "text-slate-400"}`}>
+                    Ideal for: {plan.idealFor}
+                  </p>
+                  <p className={`text-[12px] leading-relaxed mt-3 mb-0 flex-1 ${i === 2 ? "text-slate-400" : "text-slate-500"}`}>
+                    {plan.description}
+                  </p>
+                  <Button
+                    onClick={() => { window.location.href = "/#contact"; }}
+                    className={`mt-5 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
+                      i === 2
+                        ? "bg-white text-slate-900 hover:bg-slate-100"
+                        : plan.highlight
+                        ? "bg-slate-900 text-white hover:bg-slate-700"
+                        : "bg-slate-900 text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {/* Installation fee callout */}
+            <div className="mt-6 flex justify-center">
+              <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-[#fafafa] border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm text-center sm:text-left">
+                <Wrench className="w-4 h-4 text-slate-500 shrink-0" />
+                <div>
+                  <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
+                  <p className="text-sm font-semibold text-slate-900 mt-0.5">
+                    ₹12,000 installation fee{" "}
+                    <span className="font-normal text-slate-500">— includes full setup, onboarding & staff training</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── STANDALONE MODEL ── */}
+        {pricingModel === "standalone" && (
+          <>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900">
+                One-Time Software License
+              </h2>
+              <p className="mt-3 text-slate-500 text-sm font-medium max-w-lg mx-auto">
+                Buy the licence outright — own it permanently. AMC from Year 2 covers updates, remote support & troubleshooting.
+              </p>
+            </div>
+
+            {/* Standalone pricing table */}
+            <div className="overflow-x-auto rounded-sm border border-slate-100">
+              <table className="w-full text-sm min-w-[720px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Tier</th>
+                    <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Outlets</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Software License</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Setup & Training</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-900">Total Upfront</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">AMC / Year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {standalonePlans.map((row, i) => (
+                    <tr key={row.tier} className={`border-b border-slate-50 ${i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}`}>
+                      <td className="py-4 px-4 sm:px-5 font-bold text-slate-900 text-[13px]">{row.tier}</td>
+                      <td className="py-4 px-4 sm:px-5 text-slate-500 text-[13px] font-medium">{row.outlets}</td>
+                      <td className="py-4 px-4 sm:px-5 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.license}</td>
+                      <td className="py-4 px-4 sm:px-5 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.setup}</td>
+                      <td className="py-4 px-4 sm:px-5 text-right text-slate-900 text-[13px] font-bold whitespace-pre-line">{row.total}</td>
+                      <td className="py-4 px-4 sm:px-5 text-right text-slate-500 text-[12px] font-medium">{row.amc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-4 text-slate-400 text-xs font-medium text-center">
+              AMC covers software updates, remote support & troubleshooting. All prices exclusive of applicable taxes.
+            </p>
+          </>
+        )}
+
+        {/* ── PER-FEATURE MODEL ── */}
+        {pricingModel === "per-feature" && (
+          <div className="max-w-2xl mx-auto text-center py-8">
+            <Layers className="w-10 h-10 text-slate-300 mx-auto mb-6" strokeWidth={1.5} />
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900">
+              Add Control Without Replacing Anything
+            </h2>
+            <p className="mt-4 text-slate-500 text-base font-medium leading-relaxed max-w-lg mx-auto">
+              Already have a POS or ERP? Plug in only the modules you need — billing anomaly detection, inventory tracking, owner dashboard — without replacing your existing systems.
+            </p>
+            <p className="mt-3 text-slate-400 text-sm font-medium">
+              Pay only for the modules you use. Pricing based on outlet count and selected features.
+            </p>
+            <Button
+              onClick={() => { window.location.href = "/#contact"; }}
+              className="mt-8 bg-slate-900 text-white hover:bg-slate-800 h-12 px-10 text-[12px] uppercase tracking-widest font-bold rounded-none shadow-none"
+            >
+              Get Custom Quote
+            </Button>
+          </div>
+        )}
+
+        {/* Feature comparison table */}
         <div className="overflow-x-auto rounded-sm border border-slate-100 mt-10">
           <table className="w-full text-sm min-w-[660px]">
             <thead>
@@ -499,9 +658,9 @@ export default function Pricing() {
 
         {/* Bottom CTA */}
         <div className="mt-14 border border-slate-100 rounded-sm bg-[#fafafa] px-6 sm:px-8 py-10 text-center">
-          <p className="text-[11px] uppercase tracking-[0.25em] font-bold text-slate-400 mb-3">Ready to get started?</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] font-bold text-slate-400 mb-3">Ready to take back control?</p>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-heading">
-            Book a demo with our team.
+            See where your profits go.
           </h2>
           <p className="mt-3 text-slate-500 text-sm font-medium max-w-md mx-auto">
             All plans include dedicated onboarding support. Custom pricing available for volume and multi-outlet deployments.
@@ -513,7 +672,7 @@ export default function Pricing() {
             Book a Demo
           </Button>
           <p className="mt-4 text-slate-400 text-xs font-medium">
-            One-time installation: ₹12,000 &middot; Custom rates on consultation
+            Subscription installation: ₹12,000 &middot; Standalone & per-feature — custom rates on consultation
           </p>
         </div>
       </div>
@@ -528,7 +687,7 @@ export default function Pricing() {
                 <span className="font-heading font-bold tracking-tight text-slate-900 text-lg">MatoWork</span>
               </div>
               <p className="text-slate-400 text-sm font-medium leading-relaxed">
-                Empowering modern retail through advanced software engineering and edge computing.
+                Restaurant control & profit visibility system. See where money leaks. Take back control.
               </p>
             </div>
 
