@@ -23,11 +23,13 @@ const PUBLIC_PREFIX_PATHS = [
   "/api/auth-logout",
   "/api/contact",
   "/api/log-visit",
+  "/api/log-engagement",
   "/.netlify/functions/auth-session",
   "/.netlify/functions/auth-me",
   "/.netlify/functions/auth-logout",
   "/.netlify/functions/contact",
   "/.netlify/functions/log-visit",
+  "/.netlify/functions/log-engagement",
 ];
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {

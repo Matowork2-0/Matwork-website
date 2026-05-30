@@ -4,6 +4,7 @@ import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers }
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
+import { usePricingEngagement } from "@/hooks/use-pricing-engagement";
 
 const logoImg = "/favicon.png";
 
@@ -105,10 +106,10 @@ const featureGroups: FeatureGroup[] = [
   {
     group: "Core Control",
     features: [
-      { name: "Always-On — Works Without Internet",       values: ["YES", "YES", "YES"] },
+      { name: "Always-On: Works Without Internet",        values: ["YES", "YES", "YES"] },
       { name: "Live Profit Visibility",                   values: ["YES", "YES", "YES"] },
       { name: "Billing Anomaly Detection & Fraud Flagging", values: ["YES", "YES", "YES"] },
-      { name: "Owner View — Any Device, Anywhere",        values: ["YES", "YES", "YES"] },
+      { name: "Owner View on Any Device, Anywhere",       values: ["YES", "YES", "YES"] },
       { name: "Waste & Pilferage Tracking",               values: ["YES", "YES", "YES"] },
       { name: "Full Data Ownership",                      values: ["YES", "YES", "YES"] },
       { name: "One Dashboard for Everything",             values: ["YES", "YES", "YES"] },
@@ -184,13 +185,20 @@ const pricingModels: { id: PricingModel; label: string; icon: typeof ShoppingBag
     label: "Per-Feature",
     icon: Layers,
     tagline: "Layer It In",
-    desc: "Already have a POS or ERP? Add our control layer on top — plug in only the modules you need.",
+    desc: "Already have a POS or ERP? Add our control layer on top - plug in only the modules you need.",
   },
 ];
 
 export default function Pricing() {
   const [, navigate] = useLocation();
   const user = getUserInfo();
+  const {
+    trackModelChange,
+    trackBillingToggle,
+    trackCtaClick,
+    trackFeatureExpansion,
+    trackTierInteraction,
+  } = usePricingEngagement();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pricingModel, setPricingModel] = useState<PricingModel>("subscription");
@@ -263,7 +271,7 @@ export default function Pricing() {
                 {label}
               </a>
             ))}
-            {/* Pricing — active page */}
+            {/* Pricing - active page */}
             <span className="relative text-[13px] uppercase tracking-widest font-semibold text-slate-900">
               Pricing
               <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
@@ -274,7 +282,7 @@ export default function Pricing() {
           <div className="flex items-center gap-4">
             {/* Desktop only */}
             <Button
-              onClick={() => { window.location.href = "/#contact"; }}
+              onClick={() => { trackCtaClick("Book Demo - Header"); window.location.href = "/#contact"; }}
               className="hidden md:inline-flex bg-slate-900 text-white hover:bg-slate-800 px-6 py-5 rounded-md h-auto text-[13px] uppercase tracking-widest font-bold border-none shadow-none"
             >
               Book Demo
@@ -321,7 +329,7 @@ export default function Pricing() {
               </a>
             ))}
 
-            {/* Active page — Pricing */}
+            {/* Active page - Pricing */}
             <span className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block shrink-0" />
               Pricing
@@ -329,7 +337,7 @@ export default function Pricing() {
 
             <Button
               className="w-full bg-slate-900 py-6 text-[12px] uppercase tracking-widest font-bold rounded-none"
-              onClick={() => { setMobileMenuOpen(false); window.location.href = "/#contact"; }}
+              onClick={() => { setMobileMenuOpen(false); trackCtaClick("Book Demo - Mobile"); window.location.href = "/#contact"; }}
             >
               Book Demo
             </Button>
@@ -390,7 +398,7 @@ export default function Pricing() {
                 return (
                   <button
                     key={model.id}
-                    onClick={() => setPricingModel(model.id)}
+                    onClick={() => { setPricingModel(model.id); trackModelChange(model.id); }}
                     className={`relative flex flex-col items-center gap-2 px-4 py-4 rounded-sm border transition-all text-center ${
                       isActive
                         ? "bg-slate-900 text-white border-slate-900"
@@ -428,7 +436,7 @@ export default function Pricing() {
                   type="button"
                   role="tab"
                   aria-selected={billingCycle === "monthly"}
-                  onClick={() => setBillingCycle("monthly")}
+                  onClick={() => { setBillingCycle("monthly"); trackBillingToggle(); }}
                   className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
                     billingCycle === "monthly"
                       ? "bg-slate-900 text-white"
@@ -441,7 +449,7 @@ export default function Pricing() {
                   type="button"
                   role="tab"
                   aria-selected={billingCycle === "yearly"}
-                  onClick={() => setBillingCycle("yearly")}
+                  onClick={() => { setBillingCycle("yearly"); trackBillingToggle(); }}
                   className={`min-w-[126px] px-5 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-semibold transition-all ${
                     billingCycle === "yearly"
                       ? "bg-slate-900 text-white"
@@ -461,6 +469,7 @@ export default function Pricing() {
               {plans.map((plan, i) => (
                 <div
                   key={plan.name}
+                  onMouseEnter={() => trackTierInteraction(plan.name)}
                   className={`relative rounded-sm p-6 md:p-8 text-center flex flex-col ${
                     i === 2
                       ? "bg-slate-900 text-white"
@@ -498,7 +507,7 @@ export default function Pricing() {
                     {plan.description}
                   </p>
                   <Button
-                    onClick={() => { window.location.href = "/#contact"; }}
+                    onClick={() => { trackCtaClick(`Get Started - ${plan.name}`); window.location.href = "/#contact"; }}
                     className={`mt-5 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
                       i === 2
                         ? "bg-white text-slate-900 hover:bg-slate-100"
@@ -521,7 +530,7 @@ export default function Pricing() {
                   <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
                   <p className="text-sm font-semibold text-slate-900 mt-0.5">
                     ₹12,000 installation fee{" "}
-                    <span className="font-normal text-slate-500">— includes full setup, onboarding & staff training</span>
+                    <span className="font-normal text-slate-500">includes full setup, onboarding & staff training</span>
                   </p>
                 </div>
               </div>
@@ -537,7 +546,7 @@ export default function Pricing() {
                 One-Time Software License
               </h2>
               <p className="mt-3 text-slate-500 text-sm font-medium max-w-lg mx-auto">
-                Buy the licence outright — own it permanently. AMC from Year 2 covers updates, remote support & troubleshooting.
+                Buy the licence outright and own it permanently. AMC from Year 2 covers updates, remote support & troubleshooting.
               </p>
             </div>
 
@@ -583,13 +592,13 @@ export default function Pricing() {
               Add Control Without Replacing Anything
             </h2>
             <p className="mt-4 text-slate-500 text-base font-medium leading-relaxed max-w-lg mx-auto">
-              Already have a POS or ERP? Plug in only the modules you need — billing anomaly detection, inventory tracking, owner dashboard — without replacing your existing systems.
+              Already have a POS or ERP? Plug in only the modules you need (billing anomaly detection, inventory tracking, owner dashboard) without replacing your existing systems.
             </p>
             <p className="mt-3 text-slate-400 text-sm font-medium">
               Pay only for the modules you use. Pricing based on outlet count and selected features.
             </p>
             <Button
-              onClick={() => { window.location.href = "/#contact"; }}
+              onClick={() => { trackCtaClick("Get Custom Quote"); window.location.href = "/#contact"; }}
               className="mt-8 bg-slate-900 text-white hover:bg-slate-800 h-12 px-10 text-[12px] uppercase tracking-widest font-bold rounded-none shadow-none"
             >
               Get Custom Quote
@@ -648,7 +657,7 @@ export default function Pricing() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => setShowFullComparison((prev) => !prev)}
+              onClick={() => { setShowFullComparison((prev) => !prev); trackFeatureExpansion(); }}
               className="inline-flex items-center justify-center px-4 py-2 text-[11px] uppercase tracking-widest font-semibold text-slate-700 border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
             >
               {showFullComparison ? "Show Fewer Features" : `Show Full Comparison (${totalFeatureCount} Features)`}
@@ -666,13 +675,13 @@ export default function Pricing() {
             All plans include dedicated onboarding support. Custom pricing available for volume and multi-outlet deployments.
           </p>
           <Button
-            onClick={() => { window.location.href = "/#contact"; }}
+            onClick={() => { trackCtaClick("Book a Demo"); window.location.href = "/#contact"; }}
             className="mt-7 bg-slate-900 text-white hover:bg-slate-800 h-12 px-8 sm:px-10 text-[12px] uppercase tracking-widest font-bold rounded-none shadow-none"
           >
             Book a Demo
           </Button>
           <p className="mt-4 text-slate-400 text-xs font-medium">
-            Subscription installation: ₹12,000 &middot; Standalone & per-feature — custom rates on consultation
+            Subscription installation: ₹12,000 &middot; Standalone & per-feature: custom rates on consultation
           </p>
         </div>
       </div>
