@@ -239,7 +239,7 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // POST /api/auth-session — verifies Google credential and sets secure session cookie.
+  // POST /api/auth-session - verifies Google credential and sets secure session cookie.
   app.post("/api/auth-session", async (req: Request, res: Response) => {
     try {
       const credential = String(req.body?.credential || "");
@@ -337,7 +337,7 @@ export async function registerRoutes(
     }
   });
 
-  // GET /api/auth-me — returns current session user from HttpOnly cookie.
+  // GET /api/auth-me - returns current session user from HttpOnly cookie.
   app.get("/api/auth-me", async (req: Request, res: Response) => {
     const sessionSecret = process.env.AUTH_SESSION_SECRET;
     if (!sessionSecret) {
@@ -365,13 +365,13 @@ export async function registerRoutes(
     });
   });
 
-  // POST /api/auth-logout — clears session cookie.
+  // POST /api/auth-logout - clears session cookie.
   app.post("/api/auth-logout", async (_req: Request, res: Response) => {
     res.setHeader("Set-Cookie", clearSessionCookie());
     return res.status(200).json({ ok: true });
   });
 
-  // POST /api/contact — secure proxy to Google Sheets
+  // POST /api/contact - secure proxy to Google Sheets
   app.post("/api/contact", async (req: Request, res: Response) => {
     try {
       // Rate limiting
@@ -442,7 +442,7 @@ export async function registerRoutes(
     }
   });
 
-  // POST /api/log-visit — log page visits to Google Sheets
+  // POST /api/log-visit - log page visits to Google Sheets
   app.post("/api/log-visit", async (req: Request, res: Response) => {
     try {
       const body = req.body;
@@ -483,7 +483,7 @@ export async function registerRoutes(
         timestamp: body.timestamp || new Date().toISOString(),
         page: body.page || "",
         ip: clientIp,
-        device: `${device} — ${os} — ${browser}`,
+        device: `${device} | ${os} | ${browser}`,
         screen: body.screen || "",
         referrer: body.referrer || "",
         language: body.language || "",

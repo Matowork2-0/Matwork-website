@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers } from "lucide-react";
+import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
@@ -664,6 +664,34 @@ export default function Pricing() {
             </button>
           </div>
         )}
+
+        {/* Why MatoWork */}
+        <div className="mt-14 md:mt-20">
+          <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 text-center mb-3">Why MatoWork</h2>
+          <h3 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 text-center mb-10">
+            What no other Indian POS <span className="text-slate-400 italic font-serif">offers.</span>
+          </h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { icon: WifiOff,          title: "True Offline-First",      desc: "Runs on local Postgres per outlet. Full billing, KDS, inventory, and staff ops with zero internet." },
+              { icon: Database,         title: "Full Data Ownership",     desc: "Your data lives in your database. Export anytime. No vendor lock-in. No asking permission." },
+              { icon: ShieldCheck,      title: "Anti-Fraud Built-In",     desc: "Void gating, cash variance tracking, discount authority, chargeback recording, and immutable audit trails." },
+              { icon: UtensilsCrossed,  title: "Recipe-Level Costing",    desc: "Ingredient BOM per menu item. Cost classified as optimal, warning, or critical with threshold alerts." },
+              { icon: QrCode,           title: "Dual QR Ordering",        desc: "LAN-based QR for dine-in (zero internet) + cloud QR for outside customers. Bypass aggregator fees." },
+              { icon: BarChart3,        title: "Owner Dashboard",         desc: "Revenue trends, food cost health, menu performance, inventory alerts from any device, anywhere." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-3.5 p-4 border border-slate-100 rounded-sm bg-white">
+                <div className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg shrink-0 mt-0.5">
+                  <item.icon className="w-4 h-4 text-slate-700" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h4 className="text-[13px] font-bold text-slate-900 mb-1 font-heading tracking-tight">{item.title}</h4>
+                  <p className="text-slate-500 text-[12px] leading-relaxed font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom CTA */}
         <div className="mt-14 border border-slate-100 rounded-sm bg-[#fafafa] px-6 sm:px-8 py-10 text-center">

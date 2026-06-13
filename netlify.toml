@@ -10,7 +10,7 @@
   function = "auth-guard"
   path = "/*"
 
-# SPA fallback — all non-file, non-function routes go to index.html
+# SPA fallback - all non-file, non-function routes go to index.html
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"

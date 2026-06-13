@@ -3,15 +3,26 @@ import { motion } from "framer-motion";
 import {
   WifiOff,
   Zap,
-  BrainCircuit,
   ShieldCheck,
-  TrendingUp,
-  Sparkles,
   ArrowRight,
   Menu,
   X,
   Loader2,
   LogOut,
+  Database,
+  Scale,
+  SearchCheck,
+  UtensilsCrossed,
+  QrCode,
+  Plug,
+  BarChart3,
+  Receipt,
+  Cloud,
+  Award,
+  Tag,
+  Users,
+  ArrowLeftRight,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -319,15 +330,15 @@ export default function Home() {
             >
               <motion.div variants={fadeIn} className="inline-block mb-4 md:mb-6">
                 <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 border-b border-slate-200 pb-2">
-                  Enterprise POS Systems
+                  Restaurant Control Suite
                 </span>
               </motion.div>
               <motion.h1 variants={fadeIn} className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-heading leading-[1.02] sm:leading-[1.05] tracking-tight mb-6 md:mb-8 text-slate-900">
-                The New Standard<br />
-                In <span className="text-slate-400 italic font-serif">Indian Retail.</span>
+                Your Data. Your<br />
+                <span className="text-slate-400 italic font-serif">Hardware.</span> Your Control.
               </motion.h1>
               <motion.p variants={fadeIn} className="text-[15px] sm:text-lg md:text-xl text-slate-500 mb-8 md:mb-12 leading-[1.75] sm:leading-relaxed max-w-2xl mx-auto font-medium px-2">
-                India's offline-first POS and billing software for restaurants, retail stores, and cafes. GST-ready, fast billing, and clear analytics in one system.
+                India's only POS that runs entirely on your local database. Full billing, orders, inventory, and staff management without internet. No cloud dependency. No vendor lock-in. No data hostage.
               </motion.p>
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
                 <Button
@@ -356,9 +367,9 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8 mb-12 md:mb-24">
             <div className="max-w-2xl">
-              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">POS Software Features</h2>
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">What No Other Indian POS Offers</h2>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight">
-                AI-powered POS software built for Indian retail.
+                Capabilities you won't find<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">anywhere else.</span>
               </h3>
             </div>
             <div className="pb-2">
@@ -366,7 +377,7 @@ export default function Home() {
                 onClick={() => scrollTo('contact')}
                 className="group flex items-center gap-2 text-[13px] uppercase tracking-widest font-bold text-slate-900"
               >
-                Inquire about custom modules
+                See it in action
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
@@ -374,12 +385,12 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 lg:gap-x-12 gap-y-12 lg:gap-y-20">
             {[
-              { icon: WifiOff,      title: "Offline Resilience",          desc: "Military-grade data persistence that operates without connectivity, syncing seamlessly when online." },
-              { icon: Zap,          title: "High-Performance Billing",     desc: "Engineered for high-volume environments where transaction speed is a critical business metric." },
-              { icon: BrainCircuit, title: "Neural Analytics",             desc: "Advanced predictive models that transform raw transaction data into strategic growth insights." },
-              { icon: ShieldCheck,  title: "Staff Activity & Oversight",   desc: "Full visibility into every staff action. Per-cashier logs, void and discount tracking, shift summaries, and alerts on suspicious patterns." },
-              { icon: TrendingUp,   title: "Demand Forecasting",           desc: "AI predicts future stock needs based on sales patterns, seasonality, and trends. Prevents overstocking and stockouts before they happen." },
-              { icon: Sparkles,     title: "Dynamic Pricing Intelligence", desc: "AI-driven price recommendations based on demand signals, time-of-day patterns, and inventory levels to maximise revenue." },
+              { icon: WifiOff,      title: "True Offline-First Architecture",  desc: "Runs on local Postgres per outlet. Full billing, orders, KDS, payments, inventory, and staff management work with zero internet. Cloud is optional for owner analytics. Every other Indian POS is cloud-first with a degraded offline mode." },
+              { icon: Database,     title: "Full Data Ownership & Zero Lock-In", desc: "All operational data lives in your restaurant's own local database. Export anytime in standard formats. No proprietary data jail. No asking permission to access your own sales history." },
+              { icon: Scale,        title: "DPDP Act Compliance Built-In",     desc: "India's privacy law is partially effective Nov 2025, fully by May 2027. MatoWork has customer PII erasure with SHA256 verification, consent tracking, immutable tax record preservation, and local data residency. No other Indian POS has this." },
+              { icon: SearchCheck,  title: "Anti-Fraud & Loss Prevention",     desc: "Dedicated fraud detection dashboard. Chargeback recording, shift review approval, cash variance tracking, void and discount authority gating, and 9 immutable audit event types. See exactly where money leaks." },
+              { icon: UtensilsCrossed, title: "Recipe-Level Food Costing",     desc: "Ingredient-level BOM cost tracking per menu item. Food cost classified as optimal, warning, or critical with threshold alerts. Auto-consumption deduction on bill payment. Most POS systems only offer flat cost-per-unit." },
+              { icon: QrCode,       title: "Dual QR Ordering",                 desc: "LAN-based QR for dine-in (zero internet, private network) + cloud-based QR for customers outside restaurant WiFi. Bypass aggregator commissions. No other system offers both LAN and internet QR." },
             ].map((feature, i) => (
               <div key={i} className="group">
                 <div className="w-12 h-12 flex items-center justify-center mb-6 md:mb-8 bg-slate-50 rounded-lg group-hover:bg-slate-900 transition-colors duration-300">
@@ -393,11 +404,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Differentiators Section */}
+      <section className="py-16 md:py-28 bg-[#fafafa] border-t border-slate-100">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-12 md:mb-20">
+            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Beyond Standard POS</h2>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight">
+              Every edge that<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">matters.</span>
+            </h3>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+            {[
+              { icon: Plug,            title: "13 Integration Adapters",        desc: "Tally, Zoho, SAP B1, Swiggy, Zomato, UrbanPiper, WhatsApp, Google Sheets, and more from one system." },
+              { icon: Receipt,         title: "B2B Invoicing with GST",         desc: "IGST vs CGST+SGST auto-determination, GSTIN binding, GSTR-1 export with B2B/B2CS/CDNR/HSN sections." },
+              { icon: Cloud,           title: "Privacy-First Cloud Sync",       desc: "21 payload types sync to cloud as aggregates only. Owner sees revenue and trends. Customer PII never leaves local." },
+              { icon: Award,           title: "Loyalty with Auto-Earn",         desc: "Points on payment, tier-based auto-discount, 4-tier system, and loyalty clawback on refunds. Works fully offline." },
+              { icon: Tag,             title: "Promotions Engine",              desc: "Coupon codes with usage limits, BOGO, combo pricing, time-window happy hours with day-of-week rules." },
+              { icon: Users,           title: "4-Tier Role Separation",         desc: "Operator controls licensing fleet. Owner sees analytics. Manager runs daily ops. Staff gets role-specific UI." },
+              { icon: ArrowLeftRight,  title: "Inter-Outlet Transfers",         desc: "Idempotent ship/receive with approval workflow. Stock movements tracked locally, cloud matches source and destination." },
+              { icon: Lock,            title: "Cryptographic Licensing",        desc: "Ed25519 signed leases with hash chains, clock rollback guards, and offline grace windows. Cannot be cloned or tampered." },
+              { icon: BarChart3,       title: "Owner Dashboard Anywhere",       desc: "Revenue trends, food cost health, menu performance, inventory alerts, and operational KPIs from any device." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-4 p-5 md:p-6 bg-white border border-slate-100 rounded-sm">
+                <div className="w-9 h-9 flex items-center justify-center bg-slate-50 rounded-lg shrink-0">
+                  <item.icon className="w-4 h-4 text-slate-700" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 mb-1.5 font-heading tracking-tight">{item.title}</h4>
+                  <p className="text-slate-500 text-[13px] leading-relaxed font-medium">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
-      <section id="services" className="relative py-16 md:py-32 bg-[#fafafa] overflow-hidden">
+      <section id="services" className="relative py-16 md:py-32 bg-white overflow-hidden">
         {/* Mobile: background image treatment (like hero) */}
         <div className="absolute inset-0 z-0 pointer-events-none lg:hidden" style={{ backgroundImage: `url(${servicesImg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12, filter: 'grayscale(1)' }} />
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#fafafa]/80 via-[#fafafa]/40 to-[#fafafa] pointer-events-none lg:hidden" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/80 via-white/40 to-white pointer-events-none lg:hidden" />
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
@@ -414,12 +461,12 @@ export default function Home() {
             </div>
 
             <div className="order-1 lg:order-2">
-              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Custom Software Development</h2>
+              <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">Engineering Services</h2>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-6 md:mb-8 text-slate-900 tracking-tight leading-tight">
-                Bespoke Software<br />Architectures.
+                We Also Build<br /><span className="text-slate-400 italic font-serif">Custom Software.</span>
               </h3>
               <p className="text-base md:text-lg text-slate-500 mb-8 md:mb-12 leading-relaxed font-medium">
-                Our team provides end-to-end engineering services to customize, integrate, and optimize MatoWork for your specific operational requirements.
+                Beyond the POS platform, our team builds custom business applications, integrations, and data pipelines. If your operation needs something that doesn't exist off-the-shelf, we engineer it.
               </p>
 
               <div className="grid grid-cols-2 gap-y-5 md:gap-y-8 gap-x-6 md:gap-x-12">
@@ -452,12 +499,12 @@ export default function Home() {
       <section id="about" className="py-16 md:py-32 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">About MatoWork POS Software</h2>
+            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 mb-4 md:mb-6">About MatoWork</h2>
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight mb-6 md:mb-8">
-              Built for retailers who<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">never stop selling.</span>
+              A control suite, not<br className="hidden sm:inline" /> <span className="text-slate-400 italic font-serif">just a POS.</span>
             </h3>
             <p className="text-base md:text-lg text-slate-500 leading-relaxed font-medium max-w-2xl mx-auto mb-10 md:mb-16">
-              MatoWork POS is built for Indian retail, from restaurants and cafes to grocery stores and salons. It runs offline-first, so billing continues during internet outages and syncs automatically when you're back online. With fast billing, real-time inventory tracking, and AI-powered insights, it gives growing businesses the tools used by enterprise chains.
+              Most POS systems are billing machines with bolted-on features. MatoWork is a restaurant control suite: billing, inventory, recipes, loyalty, promotions, anti-fraud, staff oversight, B2B invoicing, and owner analytics in one local-first system. Your data stays on your hardware. Your operations run without internet. You export and leave whenever you want.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
               {[
