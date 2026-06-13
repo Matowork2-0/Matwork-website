@@ -45,7 +45,7 @@ export default async (req: Request, context: Context) => {
       timestamp: body.timestamp || new Date().toISOString(),
       page: body.page || "",
       ip: context.ip || "unknown",
-      device: `${device} — ${os} — ${browser}`,
+      device: `${device} | ${os} | ${browser}`,
       screen: body.screen || "",
       referrer: body.referrer || "",
       language: body.language || "",

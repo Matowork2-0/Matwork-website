@@ -1,7 +1,7 @@
 import type { Context } from "@netlify/functions";
 
 // ── Rate Limiter (in-memory sliding window) ─────────────────────────────────
-// NOTE: Netlify Functions are stateless — each cold start resets this.
+// NOTE: Netlify Functions are stateless - each cold start resets this.
 // This still protects against rapid-fire bursts within a warm instance.
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 const RATE_LIMIT_MAX = 5;

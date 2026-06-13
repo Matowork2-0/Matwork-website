@@ -12,7 +12,7 @@ export default async (req: Request, _context: Context) => {
 
     const logUrl = process.env.GOOGLE_ACTIVITY_LOG_URL;
     if (!logUrl) {
-        // Silently succeed — logging is non-critical, don't block the user
+        // Silently succeed - logging is non-critical, don't block the user
         console.warn("[log-activity] GOOGLE_ACTIVITY_LOG_URL is not set. Login not logged.");
         return new Response(JSON.stringify({ ok: true }), {
             status: 200,
@@ -38,7 +38,7 @@ export default async (req: Request, _context: Context) => {
             action,
         };
 
-        console.log(`[log-activity] Logging: ${email} — ${action}`);
+        console.log(`[log-activity] Logging: ${email} | ${action}`);
 
         const res = await fetch(logUrl, {
             method: "POST",
@@ -53,7 +53,7 @@ export default async (req: Request, _context: Context) => {
             console.warn("[log-activity] Sheet endpoint returned non-2xx.");
         }
 
-        // Non-critical — return 200 regardless so the UI is never blocked
+        // Non-critical - return 200 regardless so the UI is never blocked
         return new Response(JSON.stringify({ ok: true }), {
             status: 200,
             headers: { "Content-Type": "application/json" },
