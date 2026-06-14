@@ -101,7 +101,7 @@ export function usePricingEngagement() {
     maxScrollDepth: 0,
     scrollMilestones: new Set(),
     timeBucketReached: "0s",
-    pricingModelsViewed: new Set(["subscription"]),
+    pricingModelsViewed: new Set(["standalone"]),
     billingToggleUsed: false,
     ctaClicks: new Set(),
     ctaClickCount: 0,
