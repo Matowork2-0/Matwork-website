@@ -733,5 +733,161 @@ export async function registerRoutes(
     }
   });
 
+  // GET /api/pricing-data - returns pricing data only with a valid lead token
+  app.get("/api/pricing-data", async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (!token) {
+      return res.status(401).json({ message: "Missing lead token." });
+    }
+
+    const secret = process.env.AUTH_SESSION_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: "Server configuration error." });
+    }
+
+    // Verify HMAC signature
+    const [payloadPart, sigPart] = token.split(".");
+    if (!payloadPart || !sigPart) {
+      return res.status(401).json({ message: "Invalid token." });
+    }
+
+    const expectedSig = createHmac("sha256", secret).update(payloadPart).digest("hex");
+    const expectedBuf = Buffer.from(expectedSig, "hex");
+    const providedBuf = Buffer.from(sigPart, "hex");
+    if (expectedBuf.length !== providedBuf.length || !timingSafeEqual(expectedBuf, providedBuf)) {
+      return res.status(401).json({ message: "Invalid token." });
+    }
+
+    // Check expiry
+    try {
+      const payload = JSON.parse(Buffer.from(payloadPart, "base64").toString("utf8"));
+      if (!payload.exp || payload.exp <= Date.now()) {
+        return res.status(401).json({ message: "Token expired." });
+      }
+    } catch {
+      return res.status(401).json({ message: "Invalid token." });
+    }
+
+    return res.status(200).json({
+      plans: [
+        {
+          name: "Starter",
+          monthlyPrice: "₹4,999",
+          yearlyPrice: "₹49,990",
+          monthlyPeriod: "/outlet/month",
+          yearlyPeriod: "/outlet/year",
+          yearlySaving: "Save ₹10,000",
+          idealFor: "1–2 outlets",
+          description: "Full offline-first control suite for single or dual-outlet operations.",
+          badge: null,
+          highlight: false,
+        },
+        {
+          name: "Growth",
+          monthlyPrice: "₹9,999",
+          yearlyPrice: "₹99,990",
+          monthlyPeriod: "/outlet/month",
+          yearlyPeriod: "/outlet/year",
+          yearlySaving: "Save ₹20,000",
+          idealFor: "3–10 outlets",
+          description: "Cross-outlet visibility, anomaly comparison, and centralized owner dashboard.",
+          badge: "Most Popular",
+          highlight: true,
+        },
+        {
+          name: "Enterprise",
+          monthlyPrice: "₹19,999",
+          yearlyPrice: "₹1,99,990",
+          monthlyPeriod: "/outlet/month",
+          yearlyPeriod: "/outlet/year",
+          yearlySaving: "Save ₹40,000",
+          idealFor: "10+ outlet chains",
+          description: "Advanced AI, fleet licensing, inter-outlet transfers, and dedicated support.",
+          badge: null,
+          highlight: false,
+        },
+      ],
+      standalonePlans: [
+        {
+          tier: "Starter",
+          outlets: "1–2 outlets",
+          license: "₹1,50,000",
+          setup: "₹50,000",
+          total: "₹2,00,000",
+          amc: "₹36,000 / outlet",
+        },
+        {
+          tier: "Growth",
+          outlets: "3–10 outlets",
+          license: "₹3,50,000 (3 outlets)\n+ ₹40,000 / extra",
+          setup: "₹1,00,000 (3 outlets)\n+ ₹20,000 / extra",
+          total: "₹4,50,000\n(3 outlets)",
+          amc: "₹42,000 / outlet",
+        },
+        {
+          tier: "Enterprise",
+          outlets: "10–25 outlets",
+          license: "₹7,00,000 (10 outlets)\n+ ₹35,000 / extra",
+          setup: "₹2,50,000 (10 outlets)\n+ ₹15,000 / extra",
+          total: "₹9,50,000\n(10 outlets)",
+          amc: "₹54,000 / outlet",
+        },
+        {
+          tier: "Enterprise Plus",
+          outlets: "25+ outlets",
+          license: "Custom",
+          setup: "Custom",
+          total: "Custom",
+          amc: "₹72,000 / outlet",
+        },
+      ],
+      featureGroups: [
+        {
+          group: "Core Control",
+          features: [
+            { name: "Offline-First: Full Ops Without Internet", values: ["YES", "YES", "YES"] },
+            { name: "Full Data Ownership (Local Postgres)", values: ["YES", "YES", "YES"] },
+            { name: "Fraud Detection & Audit Trails", values: ["YES", "YES", "YES"] },
+            { name: "Recipe-Level Food Costing (BOM)", values: ["YES", "YES", "YES"] },
+            { name: "Dual QR Ordering (LAN + Cloud)", values: ["YES", "YES", "YES"] },
+            { name: "Owner Dashboard on Any Device", values: ["YES", "YES", "YES"] },
+            { name: "Waste & Pilferage Tracking", values: ["YES", "YES", "YES"] },
+            { name: "DPDP Compliance (PII Erasure & Consent)", values: ["YES", "YES", "YES"] },
+          ],
+        },
+        {
+          group: "Multi-Outlet & Scale",
+          features: [
+            { name: "Cross-Outlet Anomaly Comparison", values: ["NO", "YES", "YES"] },
+            { name: "Inter-Outlet Stock Transfers", values: ["NO", "YES", "YES"] },
+            { name: "Centralized Owner Dashboard", values: ["NO", "YES", "YES"] },
+            { name: "B2B Invoicing with GST", values: ["NO", "YES", "YES"] },
+            { name: "Loyalty & Promotions Engine", values: ["NO", "YES", "YES"] },
+          ],
+        },
+        {
+          group: "Intelligence & AI",
+          features: [
+            { name: "AI Anomaly Detection", values: ["NO", "Basic AI", "Advanced AI"] },
+            { name: "Customer Spend & Retention Tracking", values: ["NO", "YES", "YES"] },
+            { name: "Customer Profitability Analysis", values: ["NO", "NO", "YES"] },
+            { name: "Predictive Demand & Cost Alerts", values: ["NO", "NO", "YES"] },
+          ],
+        },
+        {
+          group: "Enterprise",
+          features: [
+            { name: "Fleet Licensing (Ed25519 Signed Leases)", values: ["NO", "NO", "YES"] },
+            { name: "Integration Adapters (Tally, SAP, Zoho)", values: ["NO", "NO", "YES"] },
+            { name: "Dedicated Account Manager", values: ["NO", "NO", "YES"] },
+            { name: "Voice Owner Dashboard", values: ["NO", "NO", "YES"] },
+          ],
+        },
+      ],
+    });
+  });
+
   return httpServer;
 }

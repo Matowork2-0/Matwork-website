@@ -1,11 +1,11 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3 } from "lucide-react";
+import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
 import { usePricingEngagement } from "@/hooks/use-pricing-engagement";
-import PricingLeadGate, { checkLeadToken } from "@/components/PricingLeadGate";
+import PricingLeadGate, { checkLeadToken, LEAD_STORAGE_KEY } from "@/components/PricingLeadGate";
 
 const logoImg = "/favicon.png";
 
@@ -22,130 +22,62 @@ const staggerContainer = {
 type PricingModel = "subscription" | "standalone" | "per-feature";
 type BillingCycle = "monthly" | "yearly";
 
-const plans = [
-  {
-    name: "Starter",
-    monthlyPrice: "₹4,999",
-    yearlyPrice: "₹49,990",
-    monthlyPeriod: "/outlet/month",
-    yearlyPeriod: "/outlet/year",
-    yearlySaving: "Save ₹10,000",
-    idealFor: "1–2 outlets",
-    description: "Full offline-first control suite for single or dual-outlet operations.",
-    badge: null,
-    highlight: false,
-  },
-  {
-    name: "Growth",
-    monthlyPrice: "₹9,999",
-    yearlyPrice: "₹99,990",
-    monthlyPeriod: "/outlet/month",
-    yearlyPeriod: "/outlet/year",
-    yearlySaving: "Save ₹20,000",
-    idealFor: "3–10 outlets",
-    description: "Cross-outlet visibility, anomaly comparison, and centralized owner dashboard.",
-    badge: "Most Popular",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    monthlyPrice: "₹19,999",
-    yearlyPrice: "₹1,99,990",
-    monthlyPeriod: "/outlet/month",
-    yearlyPeriod: "/outlet/year",
-    yearlySaving: "Save ₹40,000",
-    idealFor: "10+ outlet chains",
-    description: "Advanced AI, fleet licensing, inter-outlet transfers, and dedicated support.",
-    badge: null,
-    highlight: false,
-  },
-];
-
-const standalonePlans = [
-  {
-    tier: "Starter",
-    outlets: "1–2 outlets",
-    license: "₹1,50,000",
-    setup: "₹50,000",
-    total: "₹2,00,000",
-    amc: "₹36,000 / outlet",
-  },
-  {
-    tier: "Growth",
-    outlets: "3–10 outlets",
-    license: "₹3,50,000 (3 outlets)\n+ ₹40,000 / extra",
-    setup: "₹1,00,000 (3 outlets)\n+ ₹20,000 / extra",
-    total: "₹4,50,000\n(3 outlets)",
-    amc: "₹42,000 / outlet",
-  },
-  {
-    tier: "Enterprise",
-    outlets: "10–25 outlets",
-    license: "₹7,00,000 (10 outlets)\n+ ₹35,000 / extra",
-    setup: "₹2,50,000 (10 outlets)\n+ ₹15,000 / extra",
-    total: "₹9,50,000\n(10 outlets)",
-    amc: "₹54,000 / outlet",
-  },
-  {
-    tier: "Enterprise Plus",
-    outlets: "25+ outlets",
-    license: "Custom",
-    setup: "Custom",
-    total: "Custom",
-    amc: "₹72,000 / outlet",
-  },
-];
-
 type CellValue = "YES" | "NO" | "Basic AI" | "Advanced AI";
+
+type Plan = {
+  name: string;
+  monthlyPrice: string;
+  yearlyPrice: string;
+  monthlyPeriod: string;
+  yearlyPeriod: string;
+  yearlySaving: string;
+  idealFor: string;
+  description: string;
+  badge: string | null;
+  highlight: boolean;
+};
+
+type StandalonePlan = {
+  tier: string;
+  outlets: string;
+  license: string;
+  setup: string;
+  total: string;
+  amc: string;
+};
 
 type FeatureGroup = {
   group: string;
   features: { name: string; values: CellValue[] }[];
 };
 
-const featureGroups: FeatureGroup[] = [
-  {
-    group: "Core Control",
-    features: [
-      { name: "Offline-First: Full Ops Without Internet", values: ["YES", "YES", "YES"] },
-      { name: "Full Data Ownership (Local Postgres)",     values: ["YES", "YES", "YES"] },
-      { name: "Fraud Detection & Audit Trails",           values: ["YES", "YES", "YES"] },
-      { name: "Recipe-Level Food Costing (BOM)",          values: ["YES", "YES", "YES"] },
-      { name: "Dual QR Ordering (LAN + Cloud)",           values: ["YES", "YES", "YES"] },
-      { name: "Owner Dashboard on Any Device",            values: ["YES", "YES", "YES"] },
-      { name: "Waste & Pilferage Tracking",               values: ["YES", "YES", "YES"] },
-      { name: "DPDP Compliance (PII Erasure & Consent)",  values: ["YES", "YES", "YES"] },
-    ],
-  },
-  {
-    group: "Multi-Outlet & Scale",
-    features: [
-      { name: "Cross-Outlet Anomaly Comparison",          values: ["NO", "YES", "YES"] },
-      { name: "Inter-Outlet Stock Transfers",             values: ["NO", "YES", "YES"] },
-      { name: "Centralized Owner Dashboard",              values: ["NO", "YES", "YES"] },
-      { name: "B2B Invoicing with GST",                   values: ["NO", "YES", "YES"] },
-      { name: "Loyalty & Promotions Engine",              values: ["NO", "YES", "YES"] },
-    ],
-  },
-  {
-    group: "Intelligence & AI",
-    features: [
-      { name: "AI Anomaly Detection",                     values: ["NO", "Basic AI", "Advanced AI"] },
-      { name: "Customer Spend & Retention Tracking",      values: ["NO", "YES", "YES"] },
-      { name: "Customer Profitability Analysis",          values: ["NO", "NO", "YES"] },
-      { name: "Predictive Demand & Cost Alerts",          values: ["NO", "NO", "YES"] },
-    ],
-  },
-  {
-    group: "Enterprise",
-    features: [
-      { name: "Fleet Licensing (Ed25519 Signed Leases)",  values: ["NO", "NO", "YES"] },
-      { name: "Integration Adapters (Tally, SAP, Zoho)",  values: ["NO", "NO", "YES"] },
-      { name: "Dedicated Account Manager",                values: ["NO", "NO", "YES"] },
-      { name: "Voice Owner Dashboard",                    values: ["NO", "NO", "YES"] },
-    ],
-  },
-];
+type PricingData = {
+  plans: Plan[];
+  standalonePlans: StandalonePlan[];
+  featureGroups: FeatureGroup[];
+};
+
+async function fetchPricingData(): Promise<PricingData | null> {
+  const token = localStorage.getItem(LEAD_STORAGE_KEY);
+  if (!token) return null;
+
+  try {
+    const res = await fetch("/api/pricing-data", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem(LEAD_STORAGE_KEY);
+      return null;
+    }
+
+    if (!res.ok) return null;
+
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
 
 const FEATURE_PREVIEW_LIMIT = 10;
 
@@ -213,12 +145,39 @@ export default function Pricing() {
     trackFeatureExpansion,
     trackTierInteraction,
   } = usePricingEngagement();
-  const [isUnlocked, setIsUnlocked] = useState(() => checkLeadToken());
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [pricingData, setPricingData] = useState<PricingData | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pricingModel, setPricingModel] = useState<PricingModel>("standalone");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [showFullComparison, setShowFullComparison] = useState(false);
+
+  const loadPricingData = useCallback(async () => {
+    if (!checkLeadToken()) {
+      setIsUnlocked(false);
+      setIsLoadingData(false);
+      return;
+    }
+    setIsLoadingData(true);
+    const data = await fetchPricingData();
+    if (data) {
+      setPricingData(data);
+      setIsUnlocked(true);
+    } else {
+      setIsUnlocked(false);
+    }
+    setIsLoadingData(false);
+  }, []);
+
+  useEffect(() => {
+    loadPricingData();
+  }, [loadPricingData]);
+
+  const plans = pricingData?.plans || [];
+  const standalonePlans = pricingData?.standalonePlans || [];
+  const featureGroups = pricingData?.featureGroups || [];
 
   const totalFeatureCount = featureGroups.reduce((sum, group) => sum + group.features.length, 0);
   const displayedFeatureGroups = showFullComparison
@@ -729,9 +688,13 @@ export default function Pricing() {
           </p>
         </div>
       </div>
+      ) : isLoadingData ? (
+      <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-20 flex justify-center">
+        <Loader2 className="w-8 h-8 text-slate-300 animate-spin" />
+      </div>
       ) : (
       <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
-        <PricingLeadGate onUnlock={() => setIsUnlocked(true)} />
+        <PricingLeadGate onUnlock={() => loadPricingData()} />
       </div>
       )}
 

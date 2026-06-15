@@ -8,6 +8,7 @@ type SessionPayload = {
 const PUBLIC_EXACT_PATHS = new Set([
   "/",
   "/pricing",
+  "/price",
   "/login",
   "/favicon.png",
   "/opengraph.jpg",
@@ -25,6 +26,7 @@ const PUBLIC_PREFIX_PATHS = [
   "/api/log-visit",
   "/api/log-engagement",
   "/api/verify-lead",
+  "/api/pricing-data",
   "/.netlify/functions/auth-session",
   "/.netlify/functions/auth-me",
   "/.netlify/functions/auth-logout",
@@ -32,6 +34,7 @@ const PUBLIC_PREFIX_PATHS = [
   "/.netlify/functions/log-visit",
   "/.netlify/functions/log-engagement",
   "/.netlify/functions/verify-lead",
+  "/.netlify/functions/pricing-data",
 ];
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {
