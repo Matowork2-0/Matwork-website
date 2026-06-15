@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { useEffect, useRef } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -65,6 +65,7 @@ function App() {
           <Route path="/login" component={Home} />
           <Route path="/" component={Home} />
           <Route path="/pricing" component={Pricing} />
+          <Route path="/price">{() => <Redirect to="/pricing" />}</Route>
           <Route component={NotFound} />
         </Switch>
       </TooltipProvider>
