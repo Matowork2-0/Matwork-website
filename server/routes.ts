@@ -234,6 +234,38 @@ function validateContent(fields: { name: string; outlet: string; contact: string
   return null; // all good
 }
 
+// ── Lead Verification Helpers ────────────────────────────────────────────────
+function isObviousFakePhoneLead(phone10: string): string | null {
+  if (/^(\d)\1{9}$/.test(phone10)) return "This doesn't look like a real phone number.";
+  const ascending = "0123456789012345";
+  const descending = "9876543210987654";
+  if (ascending.includes(phone10) || descending.includes(phone10))
+    return "This doesn't look like a real phone number.";
+  if (/^(\d{2})\1{4}$/.test(phone10)) return "This doesn't look like a real phone number.";
+  if (/^(\d{3})\1{2}\d$/.test(phone10)) return "This doesn't look like a real phone number.";
+  if (/^[6-9]0{9}$/.test(phone10)) return "This doesn't look like a real phone number.";
+  if (/^[6-9](\d)\1{8}$/.test(phone10)) return "This doesn't look like a real phone number.";
+  const testNumbers = ["9876543210", "8765432109", "7654321098", "6543210987", "9123456789", "9012345678"];
+  if (testNumbers.includes(phone10)) return "This doesn't look like a real phone number.";
+  return null;
+}
+
+function isObviousFakeEmailLead(email: string): string | null {
+  const localPart = email.split("@")[0]?.toLowerCase() || "";
+  const fakeLocalParts = [
+    "test", "testing", "test123", "fake", "example", "sample",
+    "demo", "abc", "xyz", "asdf", "qwerty", "admin", "user",
+    "nobody", "noreply", "no-reply", "null", "void", "temp",
+    "aaa", "bbb", "ccc", "xxx", "yyy", "zzz", "foobar", "foo",
+  ];
+  if (fakeLocalParts.includes(localPart)) return "Please use your real email address.";
+  if (localPart.length >= 3 && /^(.)\1+$/.test(localPart)) return "Please use your real email address.";
+  if (/^\d+$/.test(localPart) && localPart.length <= 6) return "Please use your real email address.";
+  const keyboardPatterns = ["asdfgh", "qwerty", "zxcvbn", "hjkl", "qazwsx"];
+  if (keyboardPatterns.some((p) => localPart.startsWith(p))) return "Please use your real email address.";
+  return null;
+}
+
 // ── Routes ──────────────────────────────────────────────────────────────────
 export async function registerRoutes(
   httpServer: Server,
@@ -510,33 +542,167 @@ export async function registerRoutes(
   // POST /api/verify-lead - verify lead info and return token (local dev parity with Netlify function)
   app.post("/api/verify-lead", async (req: Request, res: Response) => {
     try {
+      // Rate limiting
+      const clientIp =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress || "unknown";
+
+      if (isRateLimited(clientIp)) {
+        return res.status(429).json({
+          message: "Too many attempts. Please wait a few minutes before trying again.",
+        });
+      }
+
       const { name, email, phone, business } = req.body;
 
-      // Basic input validation
+      // ── Input validation ────────────────────────────────────────────
       if (!name || typeof name !== "string" || name.trim().length < 2) {
-        return res.status(400).json({ message: "Please enter a valid name.", field: "name" });
+        return res.status(400).json({ message: "Please enter a valid name (at least 2 characters).", field: "name" });
       }
+      if (name.trim().length > 100) {
+        return res.status(400).json({ message: "Name is too long.", field: "name" });
+      }
+      if (isGibberish(name)) {
+        return res.status(400).json({ message: "The name you entered doesn't look valid.", field: "name" });
+      }
+      if (containsProfanity(name)) {
+        return res.status(400).json({ message: "Please use appropriate language.", field: "name" });
+      }
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailRegex.test(email.trim())) {
+      if (!email || typeof email !== "string" || !emailRegex.test(email.trim())) {
         return res.status(400).json({ message: "Please enter a valid email address.", field: "email" });
       }
+
       // Normalize phone
-      const digits = (phone || "").replace(/[\s\-+()]/g, "");
-      const cleaned = digits.startsWith("91") && digits.length === 12 ? digits.slice(2) : digits;
-      if (!/^[6-9]\d{9}$/.test(cleaned)) {
+      if (!phone || typeof phone !== "string") {
+        return res.status(400).json({ message: "Please enter your phone number.", field: "phone" });
+      }
+      const digits = phone.replace(/[\s\-+()]/g, "");
+      const phone10 = digits.startsWith("91") && digits.length === 12 ? digits.slice(2) : digits;
+      if (!/^[6-9]\d{9}$/.test(phone10)) {
         return res.status(400).json({ message: "Please enter a valid 10-digit Indian phone number.", field: "phone" });
       }
 
-      // Store lead to Google Sheets
+      // Business (optional)
+      if (business && typeof business === "string" && business.trim().length > 200) {
+        return res.status(400).json({ message: "Business name is too long.", field: "business" });
+      }
+      if (business && isGibberish(business)) {
+        return res.status(400).json({ message: "The business name doesn't look valid.", field: "business" });
+      }
+
+      // ── Phone verification (pattern + NumVerify API) ────────────────
+      const phoneFakeReason = isObviousFakePhoneLead(phone10);
+      if (phoneFakeReason) {
+        return res.status(422).json({ message: phoneFakeReason, field: "phone" });
+      }
+
+      const numverifyKey = process.env.NUMVERIFY_API_KEY;
+      if (numverifyKey) {
+        try {
+          const fullNumber = `91${phone10}`;
+          const nvRes = await fetch(
+            `http://apilayer.net/api/validate?access_key=${numverifyKey}&number=${fullNumber}&country_code=IN&format=1`
+          );
+          const nvData: any = await nvRes.json();
+          console.log("[verify-lead] NumVerify response:", JSON.stringify(nvData).substring(0, 300));
+          if (nvData.error) {
+            console.warn("[verify-lead] NumVerify API error:", JSON.stringify(nvData.error));
+          } else if (!nvData.valid) {
+            return res.status(422).json({
+              message: "This phone number could not be verified. Please enter a real number.",
+              field: "phone",
+            });
+          }
+        } catch (err: any) {
+          console.warn("[verify-lead] NumVerify call failed:", err?.message);
+        }
+      }
+
+      // ── Email verification (pattern + disposable + AbstractAPI + MX) ─
+      const emailDomain = email.trim().split("@")[1]?.toLowerCase() || "";
+      const DISPOSABLE_DOMAINS = [
+        "mailinator.com", "guerrillamail.com", "tempmail.com", "throwaway.email",
+        "yopmail.com", "sharklasers.com", "guerrillamailblock.com", "grr.la",
+        "dispostable.com", "trashmail.com", "maildrop.cc", "temp-mail.org",
+        "fakeinbox.com", "mailnesia.com", "tempinbox.com", "mohmal.com",
+        "getnada.com", "emailondeck.com", "crazymailing.com", "tmail.ws",
+      ];
+      if (DISPOSABLE_DOMAINS.includes(emailDomain)) {
+        return res.status(422).json({
+          message: "Disposable email addresses are not accepted. Please use your work email.",
+          field: "email",
+        });
+      }
+
+      const emailFakeReason = isObviousFakeEmailLead(email.trim());
+      if (emailFakeReason) {
+        return res.status(422).json({ message: emailFakeReason, field: "email" });
+      }
+
+      const abstractKey = process.env.ABSTRACT_EMAIL_API_KEY;
+      let emailVerifiedByApi = false;
+      if (abstractKey) {
+        try {
+          const aeRes = await fetch(
+            `https://emailvalidation.abstractapi.com/v1/?api_key=${abstractKey}&email=${encodeURIComponent(email.trim())}`
+          );
+          const aeData: any = await aeRes.json();
+          console.log("[verify-lead] AbstractAPI response:", JSON.stringify(aeData).substring(0, 300));
+          if (aeData.error) {
+            console.warn("[verify-lead] AbstractAPI error:", JSON.stringify(aeData.error));
+          } else {
+            if (aeData.deliverability === "UNDELIVERABLE") {
+              return res.status(422).json({
+                message: "This email address could not be verified. Please use a valid email.",
+                field: "email",
+              });
+            }
+            if (aeData.is_disposable_email?.value) {
+              return res.status(422).json({
+                message: "Disposable email addresses are not accepted. Please use your work email.",
+                field: "email",
+              });
+            }
+            if (aeData.is_valid_format?.value === false) {
+              return res.status(422).json({ message: "Invalid email format.", field: "email" });
+            }
+            emailVerifiedByApi = true;
+          }
+        } catch (err: any) {
+          console.warn("[verify-lead] AbstractAPI call failed:", err?.message);
+        }
+      }
+
+      // Fallback: MX record check via Cloudflare DNS-over-HTTPS
+      if (!emailVerifiedByApi) {
+        try {
+          const mxRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${emailDomain}&type=MX`, {
+            headers: { Accept: "application/dns-json" },
+          });
+          const mxData: any = await mxRes.json();
+          if (!mxData.Answer || mxData.Answer.length === 0) {
+            return res.status(422).json({
+              message: "This email domain does not accept mail. Please use a valid email.",
+              field: "email",
+            });
+          }
+        } catch {
+          return res.status(422).json({
+            message: "Could not verify this email address. Please try again.",
+            field: "email",
+          });
+        }
+      }
+
+      // ── Store lead to Google Sheets ─────────────────────────────────
       const sheetUrl = process.env.GOOGLE_SHEET_URL;
       if (sheetUrl) {
-        const clientIp =
-          (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-          req.socket.remoteAddress || "unknown";
         const payload = {
           name: name.trim(),
           outlet: business?.trim() || "",
-          contact: cleaned,
+          contact: phone10,
           address: `Email: ${email.trim()}`,
           timestamp: new Date().toISOString(),
           source: "pricing-gate",
@@ -549,7 +715,7 @@ export async function registerRoutes(
         }
       }
 
-      // Generate token
+      // ── Generate token ──────────────────────────────────────────────
       const secret = process.env.AUTH_SESSION_SECRET;
       if (!secret) {
         return res.status(500).json({ message: "Server configuration error." });

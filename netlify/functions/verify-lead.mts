@@ -66,33 +66,59 @@ function normalizeIndianPhone(raw: string): string | null {
     return null;
 }
 
+function isObviousFakePhone(phone10: string): string | null {
+    // All same digits: 9999999999, 8888888888, etc.
+    if (/^(\d)\1{9}$/.test(phone10)) return "This doesn't look like a real phone number.";
+    // Sequential ascending: 6789012345, 9876543210, etc.
+    const ascending = "0123456789012345";
+    const descending = "9876543210987654";
+    if (ascending.includes(phone10) || descending.includes(phone10))
+        return "This doesn't look like a real phone number.";
+    // Repeated 2-digit pattern: 9898989898, 7878787878
+    if (/^(\d{2})\1{4}$/.test(phone10)) return "This doesn't look like a real phone number.";
+    // Repeated 3-digit pattern: 9879879870 (close enough)
+    if (/^(\d{3})\1{2}\d$/.test(phone10)) return "This doesn't look like a real phone number.";
+    // Starts with 6-9 but rest all zeros: 9000000000
+    if (/^[6-9]0{9}$/.test(phone10)) return "This doesn't look like a real phone number.";
+    // All digits after first are same: 9111111111
+    if (/^[6-9](\d)\1{8}$/.test(phone10)) return "This doesn't look like a real phone number.";
+    // Common test numbers
+    const testNumbers = ["9876543210", "8765432109", "7654321098", "6543210987", "9123456789", "9012345678"];
+    if (testNumbers.includes(phone10)) return "This doesn't look like a real phone number.";
+    return null;
+}
+
 async function verifyPhone(phone10: string): Promise<{ valid: boolean; reason?: string }> {
+    // Always run pattern check first
+    const fakeReason = isObviousFakePhone(phone10);
+    if (fakeReason) return { valid: false, reason: fakeReason };
+
+    // Try NumVerify API if key is set
     const apiKey = process.env.NUMVERIFY_API_KEY;
-    if (!apiKey) {
-        console.warn("[verify-lead] NUMVERIFY_API_KEY not set, accepting format-validated phone");
-        return { valid: true };
+    if (apiKey) {
+        try {
+            const fullNumber = `91${phone10}`;
+            const res = await fetch(
+                `http://apilayer.net/api/validate?access_key=${apiKey}&number=${fullNumber}&country_code=IN&format=1`
+            );
+            const data = await res.json();
+
+            console.log("[verify-lead] NumVerify response:", JSON.stringify(data).substring(0, 300));
+
+            if (data.error) {
+                console.warn("[verify-lead] NumVerify API error:", JSON.stringify(data.error));
+                // Fall through to pattern-only validation (already passed above)
+            } else if (!data.valid) {
+                return { valid: false, reason: "This phone number could not be verified. Please enter a real number." };
+            }
+        } catch (err: any) {
+            console.warn("[verify-lead] NumVerify call failed:", err?.message);
+        }
+    } else {
+        console.warn("[verify-lead] NUMVERIFY_API_KEY not set, using pattern-only phone validation");
     }
 
-    try {
-        const fullNumber = `91${phone10}`;
-        const res = await fetch(
-            `http://apilayer.net/api/validate?access_key=${apiKey}&number=${fullNumber}&country_code=IN&format=1`
-        );
-        const data = await res.json();
-
-        if (data.error) {
-            console.warn("[verify-lead] NumVerify API error:", data.error);
-            return { valid: true }; // fail open on API error
-        }
-
-        if (!data.valid) {
-            return { valid: false, reason: "This phone number could not be verified. Please check and try again." };
-        }
-        return { valid: true };
-    } catch (err: any) {
-        console.warn("[verify-lead] NumVerify call failed:", err?.message);
-        return { valid: true }; // fail open
-    }
+    return { valid: true };
 }
 
 // ── Email Verification ──────────────────────────────────────────────────────
@@ -104,6 +130,26 @@ const DISPOSABLE_DOMAINS = [
     "getnada.com", "emailondeck.com", "crazymailing.com", "tmail.ws",
 ];
 
+function isObviousFakeEmail(email: string): string | null {
+    const localPart = email.split("@")[0]?.toLowerCase() || "";
+    // Common test/fake local parts
+    const fakeLocalParts = [
+        "test", "testing", "test123", "fake", "example", "sample",
+        "demo", "abc", "xyz", "asdf", "qwerty", "admin", "user",
+        "nobody", "noreply", "no-reply", "null", "void", "temp",
+        "aaa", "bbb", "ccc", "xxx", "yyy", "zzz", "foobar", "foo",
+    ];
+    if (fakeLocalParts.includes(localPart)) return "Please use your real email address.";
+    // All same character: aaaa@, 1111@
+    if (localPart.length >= 3 && /^(.)\1+$/.test(localPart)) return "Please use your real email address.";
+    // Pure numbers: 123456@gmail.com
+    if (/^\d+$/.test(localPart) && localPart.length <= 6) return "Please use your real email address.";
+    // Keyboard mash: asdfgh@, qwerty@
+    const keyboardPatterns = ["asdfgh", "qwerty", "zxcvbn", "hjkl", "qazwsx"];
+    if (keyboardPatterns.some((p) => localPart.startsWith(p))) return "Please use your real email address.";
+    return null;
+}
+
 async function verifyEmail(email: string): Promise<{ valid: boolean; reason?: string }> {
     const domain = email.split("@")[1]?.toLowerCase();
     if (!domain) return { valid: false, reason: "Invalid email format." };
@@ -112,6 +158,10 @@ async function verifyEmail(email: string): Promise<{ valid: boolean; reason?: st
     if (DISPOSABLE_DOMAINS.includes(domain)) {
         return { valid: false, reason: "Disposable email addresses are not accepted. Please use your work email." };
     }
+
+    // Check obvious fake local parts
+    const fakeReason = isObviousFakeEmail(email);
+    if (fakeReason) return { valid: false, reason: fakeReason };
 
     // Try AbstractAPI if key is set
     const apiKey = process.env.ABSTRACT_EMAIL_API_KEY;
@@ -122,16 +172,24 @@ async function verifyEmail(email: string): Promise<{ valid: boolean; reason?: st
             );
             const data = await res.json();
 
-            if (data.deliverability === "UNDELIVERABLE") {
-                return { valid: false, reason: "This email address could not be verified. Please use a valid email." };
+            console.log("[verify-lead] AbstractAPI response:", JSON.stringify(data).substring(0, 300));
+
+            if (data.error) {
+                console.warn("[verify-lead] AbstractAPI error:", JSON.stringify(data.error));
+                // Fall through to MX check
+            } else {
+                if (data.deliverability === "UNDELIVERABLE") {
+                    return { valid: false, reason: "This email address could not be verified. Please use a valid email." };
+                }
+                if (data.is_disposable_email?.value) {
+                    return { valid: false, reason: "Disposable email addresses are not accepted. Please use your work email." };
+                }
+                if (data.is_valid_format?.value === false) {
+                    return { valid: false, reason: "Invalid email format." };
+                }
+                // If API returned a result, trust it
+                return { valid: true };
             }
-            if (data.is_disposable_email?.value) {
-                return { valid: false, reason: "Disposable email addresses are not accepted. Please use your work email." };
-            }
-            if (data.is_valid_format?.value === false) {
-                return { valid: false, reason: "Invalid email format." };
-            }
-            return { valid: true };
         } catch (err: any) {
             console.warn("[verify-lead] AbstractAPI call failed:", err?.message);
             // Fall through to MX check
@@ -149,7 +207,8 @@ async function verifyEmail(email: string): Promise<{ valid: boolean; reason?: st
         }
         return { valid: true };
     } catch {
-        return { valid: true }; // fail open if DNS check fails
+        // If even DNS fails, reject rather than accept blindly
+        return { valid: false, reason: "Could not verify this email address. Please try again." };
     }
 }
 
