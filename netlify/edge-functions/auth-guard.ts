@@ -24,12 +24,14 @@ const PUBLIC_PREFIX_PATHS = [
   "/api/contact",
   "/api/log-visit",
   "/api/log-engagement",
+  "/api/verify-lead",
   "/.netlify/functions/auth-session",
   "/.netlify/functions/auth-me",
   "/.netlify/functions/auth-logout",
   "/.netlify/functions/contact",
   "/.netlify/functions/log-visit",
   "/.netlify/functions/log-engagement",
+  "/.netlify/functions/verify-lead",
 ];
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {

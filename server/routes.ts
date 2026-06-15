@@ -507,5 +507,64 @@ export async function registerRoutes(
     }
   });
 
+  // POST /api/verify-lead - verify lead info and return token (local dev parity with Netlify function)
+  app.post("/api/verify-lead", async (req: Request, res: Response) => {
+    try {
+      const { name, email, phone, business } = req.body;
+
+      // Basic input validation
+      if (!name || typeof name !== "string" || name.trim().length < 2) {
+        return res.status(400).json({ message: "Please enter a valid name.", field: "name" });
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email.trim())) {
+        return res.status(400).json({ message: "Please enter a valid email address.", field: "email" });
+      }
+      // Normalize phone
+      const digits = (phone || "").replace(/[\s\-+()]/g, "");
+      const cleaned = digits.startsWith("91") && digits.length === 12 ? digits.slice(2) : digits;
+      if (!/^[6-9]\d{9}$/.test(cleaned)) {
+        return res.status(400).json({ message: "Please enter a valid 10-digit Indian phone number.", field: "phone" });
+      }
+
+      // Store lead to Google Sheets
+      const sheetUrl = process.env.GOOGLE_SHEET_URL;
+      if (sheetUrl) {
+        const clientIp =
+          (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+          req.socket.remoteAddress || "unknown";
+        const payload = {
+          name: name.trim(),
+          outlet: business?.trim() || "",
+          contact: cleaned,
+          address: `Email: ${email.trim()}`,
+          timestamp: new Date().toISOString(),
+          source: "pricing-gate",
+          ip: clientIp,
+        };
+        try {
+          await fetch(sheetUrl, { method: "POST", body: JSON.stringify(payload), redirect: "follow" });
+        } catch (err: any) {
+          console.warn("[verify-lead] Google Sheets POST failed:", err?.message);
+        }
+      }
+
+      // Generate token
+      const secret = process.env.AUTH_SESSION_SECRET;
+      if (!secret) {
+        return res.status(500).json({ message: "Server configuration error." });
+      }
+      const tokenPayload = { email: email.trim(), ts: Date.now(), exp: Date.now() + 90 * 24 * 60 * 60 * 1000 };
+      const encoded = Buffer.from(JSON.stringify(tokenPayload)).toString("base64");
+      const signature = createHmac("sha256", secret).update(encoded).digest("hex");
+      const token = `${encoded}.${signature}`;
+
+      return res.status(200).json({ success: true, token });
+    } catch (err: any) {
+      console.error("[verify-lead] Error:", err?.message || err);
+      return res.status(500).json({ message: "Something went wrong." });
+    }
+  });
+
   return httpServer;
 }
