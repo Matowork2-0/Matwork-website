@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
 import { usePricingEngagement } from "@/hooks/use-pricing-engagement";
+import PricingLeadGate, { checkLeadToken } from "@/components/PricingLeadGate";
 
 const logoImg = "/favicon.png";
 
@@ -212,6 +213,7 @@ export default function Pricing() {
     trackFeatureExpansion,
     trackTierInteraction,
   } = usePricingEngagement();
+  const [isUnlocked, setIsUnlocked] = useState(() => checkLeadToken());
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pricingModel, setPricingModel] = useState<PricingModel>("standalone");
@@ -432,7 +434,8 @@ export default function Pricing() {
       </div>
       </div>{/* end bg-[#fafafa] wrapper */}
 
-      {/* Main content */}
+      {/* Main content - gated behind lead form */}
+      {isUnlocked ? (
       <div className="container mx-auto px-4 sm:px-6 py-10 md:py-20 max-w-5xl">
 
         {/* ── SUBSCRIPTION MODEL ── */}
@@ -726,6 +729,11 @@ export default function Pricing() {
           </p>
         </div>
       </div>
+      ) : (
+      <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+        <PricingLeadGate onUnlock={() => setIsUnlocked(true)} />
+      </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-white py-12 md:py-20 border-t border-slate-100">
