@@ -168,24 +168,25 @@ async function verifyEmail(email: string): Promise<{ valid: boolean; reason?: st
     if (apiKey) {
         try {
             const res = await fetch(
-                `https://emailvalidation.abstractapi.com/v1/?api_key=${apiKey}&email=${encodeURIComponent(email)}`
+                `https://emailreputation.abstractapi.com/v1/?api_key=${apiKey}&email=${encodeURIComponent(email)}`
             );
             const data = await res.json();
 
-            console.log("[verify-lead] AbstractAPI response:", JSON.stringify(data).substring(0, 300));
+            console.log("[verify-lead] AbstractAPI response:", JSON.stringify(data).substring(0, 500));
 
             if (data.error) {
                 console.warn("[verify-lead] AbstractAPI error:", JSON.stringify(data.error));
                 // Fall through to MX check
             } else {
-                if (data.deliverability === "UNDELIVERABLE") {
+                const d = data.email_deliverability;
+                if (d?.status === "undeliverable" || d?.is_smtp_valid === false) {
                     return { valid: false, reason: "This email address could not be verified. Please use a valid email." };
                 }
-                if (data.is_disposable_email?.value) {
-                    return { valid: false, reason: "Disposable email addresses are not accepted. Please use your work email." };
-                }
-                if (data.is_valid_format?.value === false) {
+                if (d?.is_format_valid === false) {
                     return { valid: false, reason: "Invalid email format." };
+                }
+                if (d?.is_mx_valid === false) {
+                    return { valid: false, reason: "This email domain does not accept mail. Please use a valid email." };
                 }
                 // If API returned a result, trust it
                 return { valid: true };

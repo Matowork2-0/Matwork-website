@@ -646,27 +646,28 @@ export async function registerRoutes(
       if (abstractKey) {
         try {
           const aeRes = await fetch(
-            `https://emailvalidation.abstractapi.com/v1/?api_key=${abstractKey}&email=${encodeURIComponent(email.trim())}`
+            `https://emailreputation.abstractapi.com/v1/?api_key=${abstractKey}&email=${encodeURIComponent(email.trim())}`
           );
           const aeData: any = await aeRes.json();
-          console.log("[verify-lead] AbstractAPI response:", JSON.stringify(aeData).substring(0, 300));
+          console.log("[verify-lead] AbstractAPI response:", JSON.stringify(aeData).substring(0, 500));
           if (aeData.error) {
             console.warn("[verify-lead] AbstractAPI error:", JSON.stringify(aeData.error));
           } else {
-            if (aeData.deliverability === "UNDELIVERABLE") {
+            const d = aeData.email_deliverability;
+            if (d?.status === "undeliverable" || d?.is_smtp_valid === false) {
               return res.status(422).json({
                 message: "This email address could not be verified. Please use a valid email.",
                 field: "email",
               });
             }
-            if (aeData.is_disposable_email?.value) {
+            if (d?.is_format_valid === false) {
+              return res.status(422).json({ message: "Invalid email format.", field: "email" });
+            }
+            if (d?.is_mx_valid === false) {
               return res.status(422).json({
-                message: "Disposable email addresses are not accepted. Please use your work email.",
+                message: "This email domain does not accept mail. Please use a valid email.",
                 field: "email",
               });
-            }
-            if (aeData.is_valid_format?.value === false) {
-              return res.status(422).json({ message: "Invalid email format.", field: "email" });
             }
             emailVerifiedByApi = true;
           }
