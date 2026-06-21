@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, LogOut, Wrench, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3, Loader2 } from "lucide-react";
+import { Check, Minus, LogOut, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3, Loader2, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { signOut, getUserInfo } from "@/components/AuthGate";
@@ -22,17 +22,20 @@ const staggerContainer = {
 type PricingModel = "subscription" | "standalone" | "per-feature";
 type BillingCycle = "monthly" | "yearly";
 
-type CellValue = "YES" | "NO" | "Basic AI" | "Advanced AI";
+type CellValue = "YES" | "NO";
 
 type Plan = {
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;
+  yearlyEquivalent: string;
   monthlyPeriod: string;
   yearlyPeriod: string;
   yearlySaving: string;
   idealFor: string;
   description: string;
+  seats: string;
+  extraSeat: string;
   badge: string | null;
   highlight: boolean;
 };
@@ -44,6 +47,14 @@ type StandalonePlan = {
   setup: string;
   total: string;
   amc: string;
+  seats: string;
+  extraSeat: string;
+};
+
+type PerFeatureModule = {
+  name: string;
+  standalonePrice: string;
+  subscriptionPrice: string;
 };
 
 type FeatureGroup = {
@@ -51,10 +62,19 @@ type FeatureGroup = {
   features: { name: string; values: CellValue[] }[];
 };
 
+type CostComparisonData = {
+  title: string;
+  columns: string[];
+  rows: { label: string; values: string[] }[];
+  note: string;
+};
+
 type PricingData = {
   plans: Plan[];
   standalonePlans: StandalonePlan[];
+  perFeatureModules: PerFeatureModule[];
   featureGroups: FeatureGroup[];
+  costComparison: CostComparisonData;
 };
 
 async function fetchPricingData(): Promise<PricingData | null> {
@@ -79,7 +99,7 @@ async function fetchPricingData(): Promise<PricingData | null> {
   }
 }
 
-const FEATURE_PREVIEW_LIMIT = 10;
+const FEATURE_PREVIEW_LIMIT = 12;
 
 function getFeatureGroupsPreview(groups: FeatureGroup[], limit: number): FeatureGroup[] {
   const preview: FeatureGroup[] = [];
@@ -103,35 +123,32 @@ function getFeatureGroupsPreview(groups: FeatureGroup[], limit: number): Feature
 
 function Cell({ value }: { value: CellValue }) {
   if (value === "YES") return <Check className="w-4 h-4 text-slate-900 mx-auto" strokeWidth={2.5} />;
-  if (value === "NO")  return <Minus className="w-4 h-4 text-slate-200 mx-auto" strokeWidth={2} />;
-  return (
-    <span className="inline-block px-2 py-0.5 rounded-sm bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-600 whitespace-nowrap">
-      {value}
-    </span>
-  );
+  return <Minus className="w-4 h-4 text-slate-200 mx-auto" strokeWidth={2} />;
 }
+
+const TIER_NAMES = ["Starter", "Growth", "Pro", "Enterprise"];
 
 const pricingModels: { id: PricingModel; label: string; icon: typeof ShoppingBag; tagline: string; desc: string }[] = [
   {
     id: "standalone",
     label: "Standalone",
     icon: ShoppingBag,
-    tagline: "Own the Control Layer",
-    desc: "Buy the licence outright and own it permanently. Full visibility, zero recurring fees.",
+    tagline: "4-Year License",
+    desc: "Buy the licence, own it for 4 years. AMC from Year 2 for updates & support.",
   },
   {
     id: "subscription",
     label: "Subscription",
     icon: RefreshCw,
-    tagline: "Flexible Monthly Plans",
-    desc: "Start with monthly or annual plans. Full control from day one, scale as you grow.",
+    tagline: "Monthly or Annual",
+    desc: "Flexible monthly or annual plans. 20% off on annual billing.",
   },
   {
     id: "per-feature",
     label: "Per-Feature",
     icon: Layers,
-    tagline: "Layer It In",
-    desc: "Already have a POS or ERP? Add our control layer on top - plug in only the modules you need.",
+    tagline: "Add-On Modules",
+    desc: "Add individual modules to any plan. Pay only for what you need.",
   },
 ];
 
@@ -177,7 +194,9 @@ export default function Pricing() {
 
   const plans = pricingData?.plans || [];
   const standalonePlans = pricingData?.standalonePlans || [];
+  const perFeatureModules = pricingData?.perFeatureModules || [];
   const featureGroups = pricingData?.featureGroups || [];
+  const costComparison = pricingData?.costComparison || null;
 
   const totalFeatureCount = featureGroups.reduce((sum, group) => sum + group.features.length, 0);
   const displayedFeatureGroups = showFullComparison
@@ -360,7 +379,7 @@ export default function Pricing() {
             variants={fadeIn}
             className="mt-5 text-slate-500 text-[15px] md:text-lg font-medium max-w-xl mx-auto leading-[1.75] md:leading-relaxed"
           >
-            Every plan includes the full core control layer. Scale your visibility as your business grows.
+            Every plan includes full core POS. Scale features as your business grows.
           </motion.p>
 
           {/* Pricing model selector */}
@@ -395,7 +414,7 @@ export default function Pricing() {
 
       {/* Main content - gated behind lead form */}
       {isUnlocked ? (
-      <div className="container mx-auto px-4 sm:px-6 py-10 md:py-20 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 py-10 md:py-20 max-w-6xl">
 
         {/* ── SUBSCRIPTION MODEL ── */}
         {pricingModel === "subscription" && (
@@ -431,22 +450,24 @@ export default function Pricing() {
                       : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
-                  Yearly
+                  Annual
                 </button>
               </div>
               <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500">
-                Annual billing saves ~2 months
+                Annual billing saves 20%
               </p>
             </div>
 
-            {/* Plan cards */}
-            <div className="grid grid-cols-1 gap-y-8 md:grid-cols-3 md:gap-4 mb-1">
-              {plans.map((plan, i) => (
+            {/* Plan cards - 4 tiers */}
+            <div className="grid grid-cols-1 gap-y-8 md:grid-cols-2 lg:grid-cols-4 md:gap-4 mb-1">
+              {plans.map((plan, i) => {
+                const isEnterprise = i === 3;
+                return (
                 <div
                   key={plan.name}
                   onMouseEnter={() => trackTierInteraction(plan.name)}
-                  className={`relative rounded-sm p-6 md:p-8 text-center flex flex-col ${
-                    i === 2
+                  className={`relative rounded-sm p-6 md:p-7 text-center flex flex-col ${
+                    isEnterprise
                       ? "bg-slate-900 text-white"
                       : plan.highlight
                       ? "bg-white border-2 border-slate-900"
@@ -464,27 +485,41 @@ export default function Pricing() {
                   <p className="text-[11px] uppercase tracking-[0.25em] font-bold mb-2 text-slate-400">
                     {plan.name}
                   </p>
-                  <p className={`text-3xl md:text-4xl font-bold font-heading tracking-tight ${i === 2 ? "text-white" : "text-slate-900"}`}>
+                  <p className={`text-3xl md:text-3xl font-bold font-heading tracking-tight ${isEnterprise ? "text-white" : "text-slate-900"}`}>
                     {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
                   </p>
                   <p className="text-xs font-medium mt-1 text-slate-400">
                     {billingCycle === "monthly" ? plan.monthlyPeriod : plan.yearlyPeriod}
                   </p>
                   {billingCycle === "yearly" && (
-                    <p className="text-[10px] font-bold mt-1 text-emerald-500 uppercase tracking-wider">
-                      {plan.yearlySaving}
-                    </p>
+                    <>
+                      <p className="text-[10px] font-bold mt-1 text-emerald-500 uppercase tracking-wider">
+                        {plan.yearlySaving}
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-400 mt-0.5">
+                        {plan.yearlyEquivalent} equivalent
+                      </p>
+                    </>
                   )}
-                  <p className={`text-[11px] uppercase tracking-widest font-semibold mt-2 ${i === 2 ? "text-slate-400" : "text-slate-400"}`}>
-                    Ideal for: {plan.idealFor}
+                  <p className={`text-[11px] uppercase tracking-widest font-semibold mt-2 text-slate-400`}>
+                    {plan.idealFor}
                   </p>
-                  <p className={`text-[12px] leading-relaxed mt-3 mb-0 flex-1 ${i === 2 ? "text-slate-400" : "text-slate-500"}`}>
+                  <p className={`text-[12px] leading-relaxed mt-3 flex-1 ${isEnterprise ? "text-slate-400" : "text-slate-500"}`}>
                     {plan.description}
                   </p>
+
+                  {/* Seats info */}
+                  <div className={`mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium ${isEnterprise ? "text-slate-400" : "text-slate-500"}`}>
+                    <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    <span>{plan.seats} seat{Number(plan.seats) > 1 ? "s" : ""} included</span>
+                    <span className="text-slate-300">|</span>
+                    <span>+{plan.extraSeat}/extra</span>
+                  </div>
+
                   <Button
                     onClick={() => { trackCtaClick(`Get Started - ${plan.name}`); window.location.href = "/#contact"; }}
-                    className={`mt-5 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
-                      i === 2
+                    className={`mt-4 w-full h-10 text-[11px] uppercase tracking-widest font-bold rounded-none shadow-none ${
+                      isEnterprise
                         ? "bg-white text-slate-900 hover:bg-slate-100"
                         : plan.highlight
                         ? "bg-slate-900 text-white hover:bg-slate-700"
@@ -494,21 +529,8 @@ export default function Pricing() {
                     Get Started
                   </Button>
                 </div>
-              ))}
-            </div>
-
-            {/* Installation fee callout */}
-            <div className="mt-6 flex justify-center">
-              <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-[#fafafa] border border-slate-200 rounded-sm px-5 sm:px-6 py-4 shadow-sm text-center sm:text-left">
-                <Wrench className="w-4 h-4 text-slate-500 shrink-0" />
-                <div>
-                  <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400">One-Time Setup</p>
-                  <p className="text-sm font-semibold text-slate-900 mt-0.5">
-                    ₹25,000 installation fee per outlet{" "}
-                    <span className="font-normal text-slate-500">includes full setup, onboarding & staff training</span>
-                  </p>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </>
         )}
@@ -518,35 +540,39 @@ export default function Pricing() {
           <>
             <div className="text-center mb-10">
               <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900">
-                One-Time Software License
+                4-Year Software License
               </h2>
               <p className="mt-3 text-slate-500 text-sm font-medium max-w-lg mx-auto">
-                Buy the licence outright and own it permanently. AMC from Year 2 covers updates, remote support & troubleshooting.
+                Buy the licence outright and own it for 4 years. AMC from Year 2 covers updates, remote support & troubleshooting.
               </p>
             </div>
 
             {/* Standalone pricing table */}
             <div className="overflow-x-auto rounded-sm border border-slate-100">
-              <table className="w-full text-sm min-w-[720px]">
+              <table className="w-full text-sm min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Tier</th>
-                    <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Outlets</th>
-                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Software License</th>
-                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Setup & Training</th>
-                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-900">Total Upfront</th>
-                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">AMC / Year</th>
+                    <th className="text-left py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Outlets</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">License</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Setup & Training</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-900">Total Upfront</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">AMC/yr/outlet</th>
+                    <th className="text-center py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Seats</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Extra Seat</th>
                   </tr>
                 </thead>
                 <tbody>
                   {standalonePlans.map((row, i) => (
                     <tr key={row.tier} className={`border-b border-slate-50 ${i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}`}>
                       <td className="py-4 px-4 sm:px-5 font-bold text-slate-900 text-[13px]">{row.tier}</td>
-                      <td className="py-4 px-4 sm:px-5 text-slate-500 text-[13px] font-medium">{row.outlets}</td>
-                      <td className="py-4 px-4 sm:px-5 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.license}</td>
-                      <td className="py-4 px-4 sm:px-5 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.setup}</td>
-                      <td className="py-4 px-4 sm:px-5 text-right text-slate-900 text-[13px] font-bold whitespace-pre-line">{row.total}</td>
-                      <td className="py-4 px-4 sm:px-5 text-right text-slate-500 text-[12px] font-medium">{row.amc}</td>
+                      <td className="py-4 px-3 sm:px-4 text-slate-500 text-[13px] font-medium">{row.outlets}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.license}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.setup}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-900 text-[13px] font-bold whitespace-pre-line">{row.total}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-500 text-[12px] font-medium">{row.amc}</td>
+                      <td className="py-4 px-3 sm:px-4 text-center text-slate-500 text-[12px] font-medium">{row.seats}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-500 text-[12px] font-medium">{row.extraSeat}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -554,44 +580,61 @@ export default function Pricing() {
             </div>
 
             <p className="mt-4 text-slate-400 text-xs font-medium text-center">
-              AMC covers software updates, remote support & troubleshooting. All prices exclusive of applicable taxes.
+              AMC covers software updates, remote support & troubleshooting. Extra seat is a one-time fee. All prices exclusive of applicable taxes.
             </p>
           </>
         )}
 
-        {/* ── PER-FEATURE MODEL ── */}
+        {/* ── PER-FEATURE ADD-ONS ── */}
         {pricingModel === "per-feature" && (
-          <div className="max-w-2xl mx-auto text-center py-8">
-            <Layers className="w-10 h-10 text-slate-300 mx-auto mb-6" strokeWidth={1.5} />
-            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900">
-              Add Control Without Replacing Anything
-            </h2>
-            <p className="mt-4 text-slate-500 text-base font-medium leading-relaxed max-w-lg mx-auto">
-              Already have a POS or ERP? Plug in only the modules you need (billing anomaly detection, inventory tracking, owner dashboard) without replacing your existing systems.
+          <>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900">
+                Add-On Modules
+              </h2>
+              <p className="mt-3 text-slate-500 text-sm font-medium max-w-lg mx-auto">
+                Extend any plan with individual feature modules. Available on top of both Standalone and Subscription models.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto rounded-sm border border-slate-100">
+              <table className="w-full text-sm min-w-[500px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400 w-[50%]">Module</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Standalone (one-time)</th>
+                    <th className="text-right py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400">Subscription (/month)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {perFeatureModules.map((mod, i) => (
+                    <tr key={mod.name} className={`border-b border-slate-50 ${i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}`}>
+                      <td className="py-3.5 px-4 sm:px-5 text-slate-700 font-medium text-[13px]">{mod.name}</td>
+                      <td className="py-3.5 px-4 sm:px-5 text-right text-slate-900 text-[13px] font-semibold">{mod.standalonePrice}</td>
+                      <td className="py-3.5 px-4 sm:px-5 text-right text-slate-900 text-[13px] font-semibold">{mod.subscriptionPrice}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-4 text-slate-400 text-xs font-medium text-center">
+              Modules included in higher tiers at no extra cost. Add-on pricing is for lower tiers that want individual features.
             </p>
-            <p className="mt-3 text-slate-400 text-sm font-medium">
-              Pay only for the modules you use. Pricing based on outlet count and selected features.
-            </p>
-            <Button
-              onClick={() => { trackCtaClick("Get Custom Quote"); window.location.href = "/#contact"; }}
-              className="mt-8 bg-slate-900 text-white hover:bg-slate-800 h-12 px-10 text-[12px] uppercase tracking-widest font-bold rounded-none shadow-none"
-            >
-              Get Custom Quote
-            </Button>
-          </div>
+          </>
         )}
 
         {/* Feature comparison table */}
         <div className="overflow-x-auto rounded-sm border border-slate-100 mt-10">
-          <table className="w-full text-sm min-w-[660px]">
+          <table className="w-full text-sm min-w-[760px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400 w-[45%]">
+                <th className="text-left py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold text-slate-400 w-[40%]">
                   Features
                 </th>
-                {plans.map((p) => (
-                  <th key={p.name} className="py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-900 text-center">
-                    {p.name}
+                {TIER_NAMES.map((name) => (
+                  <th key={name} className="py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-900 text-center">
+                    {name}
                   </th>
                 ))}
               </tr>
@@ -601,7 +644,7 @@ export default function Pricing() {
                 <Fragment key={`group-${group.group}`}>
                   <tr className="bg-slate-50 border-b border-t border-slate-100">
                     <td
-                      colSpan={4}
+                      colSpan={5}
                       className="py-2.5 px-4 sm:px-5 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400"
                     >
                       {group.group}
@@ -640,6 +683,60 @@ export default function Pricing() {
           </div>
         )}
 
+        {/* 7-Year Cost Comparison */}
+        {costComparison && (
+          <div className="mt-14 md:mt-20">
+            <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 text-center mb-3">How We Compare</h2>
+            <h3 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 text-center mb-10">
+              {costComparison.title}
+            </h3>
+
+            <div className="overflow-x-auto rounded-sm border border-slate-100">
+              <table className="w-full text-sm min-w-[600px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    {costComparison.columns.map((col, i) => (
+                      <th
+                        key={i}
+                        className={`py-4 px-4 sm:px-5 text-[11px] uppercase tracking-widest font-bold ${
+                          i === 0 ? "text-left text-slate-400" :
+                          i <= 2 ? "text-right text-slate-900" : "text-right text-slate-400"
+                        }`}
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {costComparison.rows.map((row, i) => {
+                    const isTotal = row.label.includes("Total");
+                    return (
+                      <tr key={row.label} className={`border-b border-slate-50 ${isTotal ? "bg-slate-50" : i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}`}>
+                        <td className={`py-3.5 px-4 sm:px-5 text-[13px] font-medium ${isTotal ? "font-bold text-slate-900" : "text-slate-700"}`}>
+                          {row.label}
+                        </td>
+                        {row.values.map((val, j) => (
+                          <td key={j} className={`py-3.5 px-4 sm:px-5 text-right text-[13px] ${
+                            isTotal ? "font-bold text-slate-900" :
+                            j <= 1 ? "font-semibold text-slate-900" : "font-medium text-slate-500"
+                          }`}>
+                            {val}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-4 text-slate-500 text-sm font-semibold text-center">
+              {costComparison.note}
+            </p>
+          </div>
+        )}
+
         {/* Why MatoWork */}
         <div className="mt-14 md:mt-20">
           <h2 className="text-[11px] uppercase tracking-[0.3em] font-bold text-slate-400 text-center mb-3">Why MatoWork</h2>
@@ -675,7 +772,7 @@ export default function Pricing() {
             See where your profits go.
           </h2>
           <p className="mt-3 text-slate-500 text-sm font-medium max-w-md mx-auto">
-            All plans include dedicated onboarding support. Custom pricing available for volume and multi-outlet deployments.
+            All plans include dedicated onboarding support. Custom pricing available for multi-outlet deployments.
           </p>
           <Button
             onClick={() => { trackCtaClick("Book a Demo"); window.location.href = "/#contact"; }}
@@ -683,9 +780,6 @@ export default function Pricing() {
           >
             Book a Demo
           </Button>
-          <p className="mt-4 text-slate-400 text-xs font-medium">
-            Subscription setup: ₹25,000/outlet &middot; Standalone & per-feature: rates included in quote
-          </p>
         </div>
       </div>
       ) : isLoadingData ? (
