@@ -34,8 +34,8 @@ type Plan = {
   yearlySaving: string;
   idealFor: string;
   description: string;
-  seats: string;
-  extraSeat: string;
+  devices: string;
+  extraDevice: string;
   badge: string | null;
   highlight: boolean;
 };
@@ -47,8 +47,8 @@ type StandalonePlan = {
   setup: string;
   total: string;
   amc: string;
-  seats: string;
-  extraSeat: string;
+  devices: string;
+  extraDevice: string;
 };
 
 type PerFeatureModule = {
@@ -508,12 +508,12 @@ export default function Pricing() {
                     {plan.description}
                   </p>
 
-                  {/* Seats info */}
+                  {/* Devices info */}
                   <div className={`mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium ${isEnterprise ? "text-slate-400" : "text-slate-500"}`}>
                     <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>{plan.seats} seat{Number(plan.seats) > 1 ? "s" : ""} included</span>
+                    <span>{plan.devices} device{Number(plan.devices) > 1 ? "s" : ""} included</span>
                     <span className="text-slate-300">|</span>
-                    <span>+{plan.extraSeat}/extra</span>
+                    <span>+{plan.extraDevice}/extra</span>
                   </div>
 
                   <Button
@@ -558,8 +558,8 @@ export default function Pricing() {
                     <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Setup & Training</th>
                     <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-900">Total Upfront</th>
                     <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">AMC/yr/outlet</th>
-                    <th className="text-center py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Seats</th>
-                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Extra Seat</th>
+                    <th className="text-center py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Devices</th>
+                    <th className="text-right py-4 px-3 sm:px-4 text-[11px] uppercase tracking-widest font-bold text-slate-400">Extra Device</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -571,8 +571,8 @@ export default function Pricing() {
                       <td className="py-4 px-3 sm:px-4 text-right text-slate-700 text-[13px] font-medium whitespace-pre-line">{row.setup}</td>
                       <td className="py-4 px-3 sm:px-4 text-right text-slate-900 text-[13px] font-bold whitespace-pre-line">{row.total}</td>
                       <td className="py-4 px-3 sm:px-4 text-right text-slate-500 text-[12px] font-medium">{row.amc}</td>
-                      <td className="py-4 px-3 sm:px-4 text-center text-slate-500 text-[12px] font-medium">{row.seats}</td>
-                      <td className="py-4 px-3 sm:px-4 text-right text-slate-500 text-[12px] font-medium">{row.extraSeat}</td>
+                      <td className="py-4 px-3 sm:px-4 text-center text-slate-500 text-[12px] font-medium">{row.devices}</td>
+                      <td className="py-4 px-3 sm:px-4 text-right text-slate-500 text-[12px] font-medium">{row.extraDevice}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -580,7 +580,7 @@ export default function Pricing() {
             </div>
 
             <p className="mt-4 text-slate-400 text-xs font-medium text-center">
-              AMC covers software updates, remote support & troubleshooting. Extra seat is a one-time fee. All prices exclusive of applicable taxes.
+              AMC covers software updates, remote support & troubleshooting. Extra device is a one-time fee. All prices exclusive of applicable taxes.
             </p>
           </>
         )}
