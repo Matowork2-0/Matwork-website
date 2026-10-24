@@ -418,13 +418,21 @@ export async function registerRoutes(
         });
       }
 
-      const { name, outlet, contact, address } = req.body;
+      const { name, outlet, contact, address, email, city, role } = req.body;
 
       // Content validation
       const validationError = validateContent({ name, outlet, contact, address });
       if (validationError) {
         return res.status(400).json({ message: validationError });
       }
+
+      // Optional new fields (older clients may not send them)
+      const emailStr = typeof email === "string" ? email.trim().slice(0, 200) : "";
+      if (emailStr && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailStr)) {
+        return res.status(400).json({ message: "Please enter a valid email address." });
+      }
+      const cityStr = typeof city === "string" ? city.trim().slice(0, 100) : "";
+      const roleStr = typeof role === "string" ? role.trim().slice(0, 40) : "";
 
       // Google Sheets proxy
       const sheetUrl = process.env.GOOGLE_SHEET_URL;
@@ -437,11 +445,27 @@ export async function registerRoutes(
 
       // Forward to Google Apps Script
       // Column order: Name | Outlet | Contact | Address | Timestamp
+      // Email/role/city are folded into the Address column so the existing
+      // sheet keeps capturing them; they are also sent as separate keys for
+      // a future sheet with dedicated columns.
+      const details = [
+        emailStr && `Email: ${emailStr}`,
+        roleStr && `Role: ${roleStr}`,
+        cityStr && `City: ${cityStr}`,
+        address?.trim() && `Notes: ${address.trim()}`,
+      ]
+        .filter(Boolean)
+        .join(" | ")
+        .slice(0, 500);
+
       const payload = {
         name: name.trim(),
         outlet: outlet?.trim() || "",
         contact: contact.trim(),
-        address: address?.trim() || "",
+        address: details,
+        email: emailStr,
+        city: cityStr,
+        role: roleStr,
         timestamp: new Date().toISOString(),
       };
 
@@ -774,9 +798,9 @@ export async function registerRoutes(
       plans: [
         {
           name: "Starter",
-          monthlyPrice: "₹1,499",
-          yearlyPrice: "₹14,399",
-          yearlyEquivalent: "₹1,200/mo",
+          monthlyPrice: "₹1,199",
+          yearlyPrice: "₹11,510",
+          yearlyEquivalent: "₹959/mo",
           monthlyPeriod: "/outlet/month",
           yearlyPeriod: "/outlet/year",
           yearlySaving: "Save 20%",
@@ -840,7 +864,7 @@ export async function registerRoutes(
           license: "₹50,000",
           setup: "₹15,000",
           total: "₹65,000",
-          amc: "₹12,000",
+          amc: "₹10,000",
           devices: "1/outlet",
           extraDevice: "₹5,000",
         },
@@ -938,17 +962,16 @@ export async function registerRoutes(
         },
       ],
       costComparison: {
-        title: "7-Year Cost Comparison (Single Outlet)",
-        columns: ["", "Standalone Starter", "Subscription Starter", "Petpooja", "POSist"],
+        title: "4-Year Cost Comparison (Single Outlet)",
+        columns: ["", "Standalone Starter", "Growth (Annual)", "Petpooja (typical)", "Restroworks / POSist"],
         rows: [
-          { label: "Year 1", values: ["₹65,000", "₹17,988", "₹18,000–60,000", "₹36,000"] },
-          { label: "Year 2", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-          { label: "Year 3", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-          { label: "Year 4", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-          { label: "Year 5+", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-          { label: "7-yr Total", values: ["₹1,01,000", "₹1,25,916", "₹1,26,000–4,20,000", "₹2,52,000"] },
+          { label: "Year 1", values: ["₹65,000", "₹28,790", "₹15,000–30,000", "₹30,000–60,000"] },
+          { label: "Year 2", values: ["₹0", "₹28,790", "Same", "Same"] },
+          { label: "Year 3", values: ["₹10,000*", "₹28,790", "Same", "Same"] },
+          { label: "Year 4", values: ["₹10,000*", "₹28,790", "Same", "Same"] },
+          { label: "4-yr Total", values: ["₹85,000", "₹1,15,160", "₹60,000–1,20,000", "₹1,20,000–2,40,000"] },
         ],
-        note: "Standalone saves ₹25K over subscription and ₹1.5L+ over POSist in 7 years.",
+        note: "Over the 4-year licence, Standalone Starter costs ₹85,000 all-in (₹65,000 if you skip the optional AMC), and the software is yours. *AMC is optional and begins only after Year 2. Competitor figures are market estimates (both custom-quote); all figures exclude GST.",
       },
     });
   });

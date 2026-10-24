@@ -134,7 +134,7 @@ const pricingModels: { id: PricingModel; label: string; icon: typeof ShoppingBag
     label: "Standalone",
     icon: ShoppingBag,
     tagline: "4-Year License",
-    desc: "Buy the licence, own it for 4 years. AMC from Year 2 for updates & support.",
+    desc: "Buy the licence, own it for 4 years. Optional AMC from Year 3 for updates & support.",
   },
   {
     id: "subscription",
@@ -253,6 +253,7 @@ export default function Pricing() {
           <nav className="hidden md:flex items-center gap-10">
             {[
               { label: "Features", href: "/#features" },
+              { label: "AI",       href: "/#ai"       },
               { label: "Services", href: "/#services" },
               { label: "About",    href: "/#about"    },
             ].map(({ label, href }) => (
@@ -308,6 +309,7 @@ export default function Pricing() {
             {/* Nav links */}
             {[
               { label: "Features", href: "/#features" },
+              { label: "AI",       href: "/#ai"       },
               { label: "Services", href: "/#services" },
               { label: "About",    href: "/#about"    },
               { label: "Contact",  href: "/#contact"  },
@@ -543,7 +545,7 @@ export default function Pricing() {
                 4-Year Software License
               </h2>
               <p className="mt-3 text-slate-500 text-sm font-medium max-w-lg mx-auto">
-                Buy the licence outright and own it for 4 years. AMC from Year 2 covers updates, remote support & troubleshooting.
+                Buy the licence outright and own it for 4 years. Optional AMC from Year 3 covers updates, remote support & troubleshooting.
               </p>
             </div>
 
@@ -580,7 +582,7 @@ export default function Pricing() {
             </div>
 
             <p className="mt-4 text-slate-400 text-xs font-medium text-center">
-              AMC covers software updates, remote support & troubleshooting. Extra device is a one-time fee. All prices exclusive of applicable taxes.
+              AMC is optional and begins only after Year 2; it covers software updates, remote support & troubleshooting. Extra device is a one-time fee. All prices exclusive of applicable taxes.
             </p>
           </>
         )}
@@ -822,14 +824,21 @@ export default function Pricing() {
                   <li><a href="/#contact" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">Contact</a></li>
                 </ul>
               </div>
+              <div>
+                <h5 className="text-[11px] uppercase tracking-widest font-bold text-slate-900 mb-4 md:mb-6">Get in Touch</h5>
+                <ul className="space-y-3 md:space-y-4">
+                  <li><a href="mailto:matowork.1721@gmail.com" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors break-all">matowork.1721@gmail.com</a></li>
+                  <li><a href="tel:+917238051053" className="text-slate-500 text-[13px] font-medium hover:text-slate-900 transition-colors">+91 72380 51053</a></li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div className="mt-12 md:mt-20 pt-6 md:pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-[11px] md:text-[12px] font-bold tracking-widest uppercase">
             <p>&copy; {new Date().getFullYear()} MatoWork. All rights reserved.</p>
             <div className="flex gap-6 md:gap-8">
-              <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
+              <a href="/privacy" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-slate-900 transition-colors">Terms of Service</a>
             </div>
           </div>
         </div>

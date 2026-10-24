@@ -48,13 +48,13 @@ async function verifyLeadToken(
 // ── Pricing Data ─────────────────────────────────────────────────────────────
 const PRICING_DATA = {
   plans: [
-    { name: "Starter", monthlyPrice: "₹1,499", yearlyPrice: "₹14,399", yearlyEquivalent: "₹1,200/mo", monthlyPeriod: "/outlet/month", yearlyPeriod: "/outlet/year", yearlySaving: "Save 20%", idealFor: "Small restaurants", description: "Full billing, ordering, KDS, and menu management for a single outlet.", devices: "1", extraDevice: "₹499/mo", badge: null, highlight: false },
+    { name: "Starter", monthlyPrice: "₹1,199", yearlyPrice: "₹11,510", yearlyEquivalent: "₹959/mo", monthlyPeriod: "/outlet/month", yearlyPeriod: "/outlet/year", yearlySaving: "Save 20%", idealFor: "Small restaurants", description: "Full billing, ordering, KDS, and menu management for a single outlet.", devices: "1", extraDevice: "₹499/mo", badge: null, highlight: false },
     { name: "Growth", monthlyPrice: "₹2,999", yearlyPrice: "₹28,790", yearlyEquivalent: "₹2,399/mo", monthlyPeriod: "/outlet/month", yearlyPeriod: "/outlet/year", yearlySaving: "Save 20%", idealFor: "Growing restaurants", description: "Add inventory management, food costing, promotions, and loyalty to your operations.", devices: "2", extraDevice: "₹499/mo", badge: "Most Popular", highlight: true },
     { name: "Pro", monthlyPrice: "₹4,999", yearlyPrice: "₹47,990", yearlyEquivalent: "₹3,999/mo", monthlyPeriod: "/outlet/month", yearlyPeriod: "/outlet/year", yearlySaving: "Save 20%", idealFor: "Multi-feature outlets", description: "Full suite with AI imports, advanced analytics, compliance, CRM, and WhatsApp campaigns.", devices: "3", extraDevice: "₹499/mo", badge: null, highlight: false },
     { name: "Enterprise", monthlyPrice: "₹7,999", yearlyPrice: "₹76,790", yearlyEquivalent: "₹6,399/mo", monthlyPeriod: "/outlet/month", yearlyPeriod: "/outlet/year", yearlySaving: "Save 20%", idealFor: "10+ outlet chains", description: "Everything in Pro plus aggregator integration, franchise management, and multi-outlet intelligence.", devices: "5", extraDevice: "₹399/mo", badge: null, highlight: false },
   ],
   standalonePlans: [
-    { tier: "Starter", outlets: "1–2", license: "₹50,000", setup: "₹15,000", total: "₹65,000", amc: "₹12,000", devices: "1/outlet", extraDevice: "₹5,000" },
+    { tier: "Starter", outlets: "1–2", license: "₹50,000", setup: "₹15,000", total: "₹65,000", amc: "₹10,000", devices: "1/outlet", extraDevice: "₹5,000" },
     { tier: "Growth", outlets: "3–10", license: "₹1,20,000 (3 outlets)\n+ ₹25,000/extra", setup: "₹30,000\n+ ₹8,000/extra", total: "₹1,50,000\n(3 outlets)", amc: "₹15,000", devices: "2/outlet", extraDevice: "₹5,000" },
     { tier: "Pro", outlets: "3–10", license: "₹1,80,000 (3 outlets)\n+ ₹35,000/extra", setup: "₹40,000\n+ ₹10,000/extra", total: "₹2,20,000\n(3 outlets)", amc: "₹18,000", devices: "3/outlet", extraDevice: "₹5,000" },
     { tier: "Enterprise", outlets: "10–25+", license: "₹3,25,000 (10 outlets)\n+ ₹20,000/extra", setup: "₹75,000\n+ ₹5,000/extra", total: "₹4,00,000\n(10 outlets)", amc: "₹24,000", devices: "5/outlet", extraDevice: "₹4,000" },
@@ -110,17 +110,16 @@ const PRICING_DATA = {
     ]},
   ],
   costComparison: {
-    title: "7-Year Cost Comparison (Single Outlet)",
-    columns: ["", "Standalone Starter", "Subscription Starter", "Petpooja", "POSist"],
+    title: "4-Year Cost Comparison (Single Outlet)",
+    columns: ["", "Standalone Starter", "Growth (Annual)", "Petpooja (typical)", "Restroworks / POSist"],
     rows: [
-      { label: "Year 1", values: ["₹65,000", "₹17,988", "₹18,000–60,000", "₹36,000"] },
-      { label: "Year 2", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-      { label: "Year 3", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-      { label: "Year 4", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-      { label: "Year 5+", values: ["₹12,000", "₹17,988", "Same", "Same"] },
-      { label: "7-yr Total", values: ["₹1,01,000", "₹1,25,916", "₹1,26,000–4,20,000", "₹2,52,000"] },
+      { label: "Year 1", values: ["₹65,000", "₹28,790", "₹15,000–30,000", "₹30,000–60,000"] },
+      { label: "Year 2", values: ["₹0", "₹28,790", "Same", "Same"] },
+      { label: "Year 3", values: ["₹10,000*", "₹28,790", "Same", "Same"] },
+      { label: "Year 4", values: ["₹10,000*", "₹28,790", "Same", "Same"] },
+      { label: "4-yr Total", values: ["₹85,000", "₹1,15,160", "₹60,000–1,20,000", "₹1,20,000–2,40,000"] },
     ],
-    note: "Standalone saves ₹25K over subscription and ₹1.5L+ over POSist in 7 years.",
+    note: "Over the 4-year licence, Standalone Starter costs ₹85,000 all-in (₹65,000 if you skip the optional AMC), and the software is yours. *AMC is optional and begins only after Year 2. Competitor figures are market estimates (both custom-quote); all figures exclude GST.",
   },
 };
 

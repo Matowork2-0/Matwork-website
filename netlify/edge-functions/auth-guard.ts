@@ -9,6 +9,8 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/",
   "/pricing",
   "/price",
+  "/privacy",
+  "/terms",
   "/login",
   "/favicon.png",
   "/opengraph.jpg",

@@ -115,7 +115,7 @@ export default async (req: Request, context: Context) => {
         }
 
         const body = await req.json();
-        const { name, outlet, contact, address } = body;
+        const { name, outlet, contact, address, email, city, role } = body;
 
         const validationError = validateContent({ name, outlet, contact, address });
         if (validationError) {
@@ -124,6 +124,17 @@ export default async (req: Request, context: Context) => {
                 headers: { "Content-Type": "application/json" },
             });
         }
+
+        // Optional new fields (older clients may not send them)
+        const emailStr = typeof email === "string" ? email.trim().slice(0, 200) : "";
+        if (emailStr && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailStr)) {
+            return new Response(
+                JSON.stringify({ message: "Please enter a valid email address." }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+            );
+        }
+        const cityStr = typeof city === "string" ? city.trim().slice(0, 100) : "";
+        const roleStr = typeof role === "string" ? role.trim().slice(0, 40) : "";
 
         // Google Sheets proxy
         const sheetUrl = process.env.GOOGLE_SHEET_URL;
@@ -136,11 +147,27 @@ export default async (req: Request, context: Context) => {
         }
 
         // Column order: Name | Outlet | Contact | Address | Timestamp
+        // Email/role/city are folded into the Address column so the existing
+        // sheet keeps capturing them; they are also sent as separate keys for
+        // a future sheet with dedicated columns.
+        const details = [
+            emailStr && `Email: ${emailStr}`,
+            roleStr && `Role: ${roleStr}`,
+            cityStr && `City: ${cityStr}`,
+            address?.trim() && `Notes: ${address.trim()}`,
+        ]
+            .filter(Boolean)
+            .join(" | ")
+            .slice(0, 500);
+
         const payload = {
             name: name.trim(),
             outlet: outlet?.trim() || "",
             contact: contact.trim(),
-            address: address?.trim() || "",
+            address: details,
+            email: emailStr,
+            city: cityStr,
+            role: roleStr,
             timestamp: new Date().toISOString(),
         };
 
