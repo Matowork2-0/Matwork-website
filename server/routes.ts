@@ -578,6 +578,8 @@ export async function registerRoutes(
       }
 
       const { name, email, phone, business } = req.body;
+      const leadCity = typeof req.body.city === "string" ? req.body.city.trim().slice(0, 100) : "";
+      const leadRole = typeof req.body.role === "string" ? req.body.role.trim().slice(0, 40) : "";
 
       // ── Input validation ────────────────────────────────────────────
       if (!name || typeof name !== "string" || name.trim().length < 2) {
@@ -728,7 +730,16 @@ export async function registerRoutes(
           name: name.trim(),
           outlet: business?.trim() || "",
           contact: phone10,
-          address: `Email: ${email.trim()}`,
+          address: [
+            `Email: ${email.trim()}`,
+            leadRole && `Role: ${leadRole}`,
+            leadCity && `City: ${leadCity}`,
+          ]
+            .filter(Boolean)
+            .join(" | "),
+          email: email.trim(),
+          city: leadCity,
+          role: leadRole,
           timestamp: new Date().toISOString(),
           source: "pricing-gate",
           ip: clientIp,

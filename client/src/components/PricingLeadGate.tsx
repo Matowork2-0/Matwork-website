@@ -35,6 +35,8 @@ export default function PricingLeadGate({ onUnlock }: PricingLeadGateProps) {
     email: "",
     phone: "",
     business: "",
+    city: "",
+    role: "",
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -102,6 +104,8 @@ export default function PricingLeadGate({ onUnlock }: PricingLeadGateProps) {
           email: formData.email.trim(),
           phone: formData.phone.trim(),
           business: formData.business.trim(),
+          city: formData.city.trim(),
+          role: formData.role,
         }),
       });
 
@@ -241,6 +245,37 @@ export default function PricingLeadGate({ onUnlock }: PricingLeadGateProps) {
               )}
             </div>
 
+            <div>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="City"
+                className="w-full bg-slate-50 border-none rounded-none p-3 md:p-4 text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all outline-none"
+              />
+            </div>
+
+            <div>
+              <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2.5">Your role</p>
+              <div className="flex flex-wrap gap-2">
+                {["Owner", "Manager", "Chef", "Other"].map((role) => (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, role: prev.role === role ? "" : role }))}
+                    className={`text-[12px] font-bold px-4 py-2 rounded-sm border transition-colors ${
+                      formData.role === role
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-slate-400"
+                    }`}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Button
               type="submit"
               disabled={isSubmitting}
@@ -259,7 +294,7 @@ export default function PricingLeadGate({ onUnlock }: PricingLeadGateProps) {
 
           <p className="text-slate-400 text-[11px] font-medium text-center mt-5 leading-relaxed">
             We'll use your details to share pricing information.{" "}
-            <a href="#" className="underline hover:text-slate-600 transition-colors">Privacy Policy</a>
+            <a href="/privacy" className="underline hover:text-slate-600 transition-colors">Privacy Policy</a>
           </p>
         </div>
       </div>

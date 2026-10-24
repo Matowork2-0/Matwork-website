@@ -278,6 +278,8 @@ export default async (req: Request, context: Context) => {
 
         const body = await req.json();
         const { name, email, phone, business } = body;
+        const cityStr = typeof body.city === "string" ? body.city.trim().slice(0, 100) : "";
+        const roleStr = typeof body.role === "string" ? body.role.trim().slice(0, 40) : "";
 
         // ── Input validation ────────────────────────────────────────────
         if (!name || typeof name !== "string" || name.trim().length < 2) {
@@ -375,7 +377,16 @@ export default async (req: Request, context: Context) => {
                 name: name.trim(),
                 outlet: business?.trim() || "",
                 contact: phone10,
-                address: `Email: ${email.trim()}`,
+                address: [
+                    `Email: ${email.trim()}`,
+                    roleStr && `Role: ${roleStr}`,
+                    cityStr && `City: ${cityStr}`,
+                ]
+                    .filter(Boolean)
+                    .join(" | "),
+                email: email.trim(),
+                city: cityStr,
+                role: roleStr,
                 timestamp: new Date().toISOString(),
                 source: "pricing-gate",
                 ip: clientIp,

@@ -5,39 +5,108 @@ const logoImg = "/favicon.png";
 
 const sections = [
   {
-    heading: "About this website",
+    heading: "1. Acceptance of these terms",
     body: [
-      "This website presents the MatoWork restaurant control suite and lets you request a demo or pricing information. By using it, you accept these terms.",
+      "These Terms of Service (\"Terms\") govern your access to and use of the MatoWork website at matowork.netlify.app (the \"Website\"), operated by MatoWork (\"MatoWork\", \"we\", \"us\"). By visiting the Website, submitting a form on it, or using any part of it, you agree to these Terms and to our Privacy Policy. If you do not agree, please do not use the Website.",
+      "If you use the Website on behalf of a company or restaurant business, you confirm that you are authorized to accept these Terms for that business, and \"you\" includes that business.",
     ],
   },
   {
-    heading: "Informational content",
+    heading: "2. What this Website is for",
     body: [
-      "Product descriptions, feature lists, and prices shown or shared from this website are indicative and may change. Final pricing, scope, and commitments are set out in the written proposal or agreement you sign with MatoWork — not by this website.",
+      "The Website presents the MatoWork restaurant control suite — an offline-first point-of-sale and restaurant management product — and lets you request a product demo, request pricing information, and contact us. The Website itself is not the product: it does not provide billing, POS, or restaurant-management functionality.",
     ],
   },
   {
-    heading: "Acceptable use",
+    heading: "3. Eligibility and accurate information",
     body: [
-      "Submit only accurate information that you are entitled to share. Do not attempt to disrupt the website, probe its systems without authorization, or submit automated spam.",
+      "The Website is intended for business users — owners, managers, and staff of food-service businesses evaluating software — and for general visitors. When you submit a form, you must provide information that is accurate, current, and yours to share: your real name, a phone number and email address you control, and your actual business details.",
+      "We may decline, ignore, or delete submissions that appear false, automated, abusive, or submitted on someone else's behalf without authority.",
     ],
   },
   {
-    heading: "Intellectual property",
+    heading: "4. Demo requests and communications",
     body: [
-      "The MatoWork name, logo, product designs, and the content of this website belong to MatoWork. You may not copy or reuse them for a competing purpose without written permission.",
+      "Submitting a demo or pricing request is an invitation for us to contact you; it does not create any purchase obligation for you or any supply obligation for us. By submitting a form, you consent to MatoWork contacting you about your request and about the MatoWork product by phone, email, or messaging, using the details you provided.",
+      "You can withdraw this consent at any time by telling us so on any channel or by writing to matowork.1721@gmail.com, and we will stop contacting you.",
     ],
   },
   {
-    heading: "No warranty for the website",
+    heading: "5. Pricing information and confidentiality",
     body: [
-      "This website is provided as-is. We work to keep it accurate and available, but we do not guarantee uninterrupted access or that every detail is current at all times.",
+      "Plan structures, feature lists, and prices shown on or shared through this Website — including pricing revealed after you complete the pricing-request form — are indicative only, are provided for your own evaluation, and may change or be withdrawn at any time without notice.",
+      "Pricing information we share with you after a form submission or consultation is intended for you and your business. You agree not to republish it or share it for purposes other than evaluating MatoWork for your business.",
+      "Nothing on this Website is a binding offer. Final pricing, scope, deliverables, support, and all commercial commitments are set out exclusively in the written proposal, quotation, or agreement signed between you and MatoWork.",
     ],
   },
   {
-    heading: "Governing law and contact",
+    heading: "6. The MatoWork product",
     body: [
-      "These terms are governed by the laws of India. Questions about them? Write to matowork.1721@gmail.com or call +91 72380 51053.",
+      "Your purchase, licensing, deployment, and use of the MatoWork product itself — including software licenses, subscriptions, setup, support, AMC, and data-protection commitments — are governed by the separate written agreement you sign with MatoWork, not by these Website Terms. If there is any conflict between these Terms and a signed agreement, the signed agreement prevails for the product.",
+    ],
+  },
+  {
+    heading: "7. Acceptable use of the Website",
+    body: [
+      "You agree not to: (a) probe, scan, or test the Website or its APIs for vulnerabilities without our written permission; (b) attempt to bypass access controls, including the pricing-request step; (c) scrape, harvest, or bulk-download Website content or submit automated form entries; (d) submit unlawful, defamatory, infringing, or deceptive content; (e) impersonate any person or business; or (f) use the Website in violation of applicable law.",
+      "We may restrict, rate-limit, or block access that we reasonably believe violates these Terms.",
+    ],
+  },
+  {
+    heading: "8. Intellectual property",
+    body: [
+      "The MatoWork name, logo, product designs, screenshots, text, graphics, and all other content on this Website are owned by MatoWork or used with permission, and are protected by applicable intellectual-property laws. We grant you a limited, revocable, non-exclusive right to view and use the Website for evaluating MatoWork for your business.",
+      "You may not copy, modify, distribute, or create derivative works from Website content, or use our name or branding, for any competing or commercial purpose without our prior written permission. Third-party names mentioned on the Website (such as integration partners) belong to their respective owners and are referenced for identification only; no affiliation or endorsement is implied.",
+    ],
+  },
+  {
+    heading: "9. Third-party services",
+    body: [
+      "The Website runs on third-party infrastructure (such as hosting and form-processing services) and may offer sign-in through third-party providers (such as Google). Your use of those services is subject to their own terms and privacy policies, which we do not control. Links to third-party websites are provided for convenience; we are not responsible for their content.",
+    ],
+  },
+  {
+    heading: "10. Privacy",
+    body: [
+      "Our Privacy Policy explains what information we collect through the Website, why, where it is stored, and how to have it corrected or deleted. It forms part of these Terms.",
+    ],
+  },
+  {
+    heading: "11. Disclaimers",
+    body: [
+      "The Website is provided on an \"as is\" and \"as available\" basis. We work to keep it accurate, secure, and available, but we make no warranty that the Website will be uninterrupted, error-free, or free of harmful components, or that every description, feature list, or figure is current at all times. Product capabilities described on the Website are summaries; their authoritative description is the one in your signed agreement and product documentation.",
+    ],
+  },
+  {
+    heading: "12. Limitation of liability",
+    body: [
+      "To the maximum extent permitted by applicable law, MatoWork will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for lost profits, revenue, data, or business opportunity, arising out of or related to your use of (or inability to use) this Website.",
+      "To the same extent, our total aggregate liability for all claims relating to the Website is limited to INR 1,000. Nothing in these Terms limits liability that cannot be limited under applicable law, including liability for fraud. This clause applies to the Website only; liability relating to the MatoWork product is addressed in your signed agreement.",
+    ],
+  },
+  {
+    heading: "13. Indemnity",
+    body: [
+      "You agree to indemnify and hold MatoWork harmless from claims, losses, and reasonable costs (including legal fees) arising from your misuse of the Website, your violation of these Terms, or information you submit that infringes the rights of another person.",
+    ],
+  },
+  {
+    heading: "14. Changes to the Website and these Terms",
+    body: [
+      "We may change, suspend, or discontinue any part of the Website at any time. We may also update these Terms; the \"Last updated\" date above reflects the current version. Changes apply from the moment they are published on this page, and your continued use of the Website after a change means you accept the updated Terms.",
+    ],
+  },
+  {
+    heading: "15. Severability and entire agreement",
+    body: [
+      "If any provision of these Terms is held unenforceable, the remaining provisions continue in full force. These Terms, together with the Privacy Policy, are the entire agreement between you and MatoWork regarding use of the Website — and, as set out above, they do not replace any signed agreement covering the MatoWork product.",
+    ],
+  },
+  {
+    heading: "16. Governing law, jurisdiction, and contact",
+    body: [
+      "These Terms are governed by the laws of India. Subject to any mandatory law to the contrary, disputes arising out of or relating to the Website are subject to the exclusive jurisdiction of the courts at Ranchi, Jharkhand, India.",
+      "Questions about these Terms? Write to matowork.1721@gmail.com or call +91 72380 51053.",
     ],
   },
 ];
@@ -84,6 +153,14 @@ export default function Terms() {
                 ))}
               </section>
             ))}
+          </div>
+
+          <div className="mt-12 md:mt-16 pt-8 border-t border-slate-100">
+            <p className="text-slate-400 text-[13px] font-medium leading-relaxed">
+              Also see our{" "}
+              <a href="/privacy" className="underline hover:text-slate-900 transition-colors">Privacy Policy</a>
+              , which explains how we handle the information you share with us.
+            </p>
           </div>
         </div>
       </main>
