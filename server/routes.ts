@@ -444,28 +444,16 @@ export async function registerRoutes(
       }
 
       // Forward to Google Apps Script
-      // Column order: Name | Outlet | Contact | Address | Timestamp
-      // Email/role/city are folded into the Address column so the existing
-      // sheet keeps capturing them; they are also sent as separate keys for
-      // a future sheet with dedicated columns.
-      const details = [
-        emailStr && `Email: ${emailStr}`,
-        roleStr && `Role: ${roleStr}`,
-        cityStr && `City: ${cityStr}`,
-        address?.trim() && `Notes: ${address.trim()}`,
-      ]
-        .filter(Boolean)
-        .join(" | ")
-        .slice(0, 500);
-
+      // Sheet columns: Name | Outlet | Contact | Email | City | Role | Notes | Source | Timestamp
       const payload = {
         name: name.trim(),
         outlet: outlet?.trim() || "",
         contact: contact.trim(),
-        address: details,
         email: emailStr,
         city: cityStr,
         role: roleStr,
+        notes: typeof address === "string" ? address.trim().slice(0, 500) : "",
+        source: "website-contact",
         timestamp: new Date().toISOString(),
       };
 
@@ -730,18 +718,12 @@ export async function registerRoutes(
           name: name.trim(),
           outlet: business?.trim() || "",
           contact: phone10,
-          address: [
-            `Email: ${email.trim()}`,
-            leadRole && `Role: ${leadRole}`,
-            leadCity && `City: ${leadCity}`,
-          ]
-            .filter(Boolean)
-            .join(" | "),
           email: email.trim(),
           city: leadCity,
           role: leadRole,
-          timestamp: new Date().toISOString(),
+          notes: "",
           source: "pricing-gate",
+          timestamp: new Date().toISOString(),
           ip: clientIp,
         };
         try {

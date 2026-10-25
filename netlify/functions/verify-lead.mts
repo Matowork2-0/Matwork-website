@@ -377,18 +377,12 @@ export default async (req: Request, context: Context) => {
                 name: name.trim(),
                 outlet: business?.trim() || "",
                 contact: phone10,
-                address: [
-                    `Email: ${email.trim()}`,
-                    roleStr && `Role: ${roleStr}`,
-                    cityStr && `City: ${cityStr}`,
-                ]
-                    .filter(Boolean)
-                    .join(" | "),
                 email: email.trim(),
                 city: cityStr,
                 role: roleStr,
-                timestamp: new Date().toISOString(),
+                notes: "",
                 source: "pricing-gate",
+                timestamp: new Date().toISOString(),
                 ip: clientIp,
                 device: getDeviceInfo(ua),
             };
