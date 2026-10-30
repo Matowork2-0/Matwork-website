@@ -141,6 +141,7 @@ export default function PricingLeadGate({ onUnlock }: PricingLeadGateProps) {
       if (data.token) {
         localStorage.setItem(LEAD_STORAGE_KEY, data.token);
       }
+      (window as any).gtag?.("event", "generate_lead", { form: "pricing_gate" });
       onUnlock();
     } catch {
       toast({

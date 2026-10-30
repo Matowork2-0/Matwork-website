@@ -8,7 +8,8 @@ const sections = [
     heading: "What we collect",
     body: [
       "When you request a demo or unlock pricing on this website, we collect the details you submit: your name, phone number, email address, restaurant or business name, city, your role, and any comments you include.",
-      "We also keep basic visit logs for this website — the page visited, device and browser type, screen size, referrer, and language. These logs help us understand interest in MatoWork. We do not use third-party advertising trackers or sell data to advertisers.",
+      "We also keep basic visit logs for this website — the page visited, device and browser type, screen size, referrer, and language. These logs help us understand interest in MatoWork. We do not use advertising trackers or sell data to advertisers.",
+      "This website uses Google Analytics and Microsoft Clarity to understand how visitors use it — pages viewed, approximate location, device type, and interaction patterns, including session recordings and heatmaps. These tools set cookies. We use this data only to improve the website; it is not used for advertising.",
     ],
   },
   {
@@ -72,7 +73,7 @@ export default function Privacy() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight text-slate-900 leading-tight mb-4">
             Privacy <span className="text-slate-400 italic font-serif">Policy.</span>
           </h1>
-          <p className="text-slate-400 text-sm font-medium mb-10 md:mb-14">Last updated: 24 October 2026</p>
+          <p className="text-slate-400 text-sm font-medium mb-10 md:mb-14">Last updated: 30 October 2026</p>
 
           <div className="space-y-10 md:space-y-12">
             {sections.map((section, i) => (

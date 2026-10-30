@@ -217,6 +217,7 @@ export default function Home() {
         title: "Demo request received!",
         description: "Thank you. We'll reach out within a few hours.",
       });
+      (window as any).gtag?.("event", "generate_lead", { form: "demo_request" });
       setIsSubmitted(true);
       setFormData({ name: "", outlet: "", contact: "", email: "", city: "", role: "", address: "" });
     } catch (err) {
