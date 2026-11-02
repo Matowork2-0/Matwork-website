@@ -8,7 +8,6 @@ import {
   Menu,
   X,
   Loader2,
-  LogOut,
   Database,
   Scale,
   SearchCheck,
@@ -36,7 +35,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { signOut, getUserInfo } from "@/components/AuthGate";
 import { useLocation } from "wouter";
 
 // Assets
@@ -64,7 +62,6 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const { toast } = useToast();
-  const user = getUserInfo();
   const [, navigate] = useLocation();
 
   // Form state
@@ -282,16 +279,6 @@ export default function Home() {
             >
               Book Demo
             </Button>
-            {user && (
-              <button
-                onClick={signOut}
-                title={`Signed in as ${user.email}`}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors"
-              >
-                <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
           </div>
 
           <button
@@ -328,16 +315,6 @@ export default function Home() {
               Pricing
             </button>
             <Button className="w-full bg-slate-900 py-6 text-[12px] uppercase tracking-widest font-bold rounded-none" onClick={() => scrollTo('contact')}>Book Demo</Button>
-            {user && (
-              <button
-                onClick={signOut}
-                className="flex items-center gap-3 text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <img src={user.picture} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
-                <span className="text-sm font-semibold text-slate-900">{user.name}</span>
-                <LogOut className="w-4 h-4 ml-auto text-slate-400" />
-              </button>
-            )}
           </div>
         )}
       </header>

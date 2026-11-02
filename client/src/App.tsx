@@ -118,7 +118,7 @@ function App() {
         <DynamicMeta />
         <VisitTracker />
         <Switch>
-          <Route path="/login" component={Home} />
+          <Route path="/login">{() => <Redirect to="/" />}</Route>
           <Route path="/" component={Home} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/price">{() => <Redirect to="/pricing" />}</Route>

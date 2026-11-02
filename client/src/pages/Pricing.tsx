@@ -1,9 +1,8 @@
 import { Fragment, useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Check, Minus, LogOut, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3, Loader2, Users } from "lucide-react";
+import { Check, Minus, Menu, X, ShoppingBag, RefreshCw, Layers, WifiOff, Database, ShieldCheck, UtensilsCrossed, QrCode, BarChart3, Loader2, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { signOut, getUserInfo } from "@/components/AuthGate";
 import { usePricingEngagement } from "@/hooks/use-pricing-engagement";
 import PricingLeadGate, { checkLeadToken, LEAD_STORAGE_KEY } from "@/components/PricingLeadGate";
 
@@ -154,7 +153,6 @@ const pricingModels: { id: PricingModel; label: string; icon: typeof ShoppingBag
 
 export default function Pricing() {
   const [, navigate] = useLocation();
-  const user = getUserInfo();
   const {
     trackModelChange,
     trackBillingToggle,
@@ -281,17 +279,6 @@ export default function Pricing() {
             >
               Book Demo
             </Button>
-            {user && (
-              <button
-                onClick={signOut}
-                title={`Signed in as ${user.email}`}
-                className="hidden md:flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors"
-              >
-                <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
-
             {/* Mobile hamburger */}
             <button
               className="md:hidden p-2 text-slate-900"
@@ -337,20 +324,6 @@ export default function Pricing() {
               Book Demo
             </Button>
 
-            {/* Sign out with profile */}
-            {user && (
-              <button
-                onClick={signOut}
-                className="flex items-center gap-3 text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <img src={user.picture} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-                  <p className="text-xs text-slate-500">{user.email}</p>
-                </div>
-                <LogOut className="w-4 h-4 ml-auto text-slate-400" />
-              </button>
-            )}
           </div>
         )}
       </header>
