@@ -51,10 +51,7 @@ function loadLocalEnv() {
 function warnMissingRuntimeEnv() {
   const required = [
     "AUTH_SESSION_SECRET",
-    "GOOGLE_CLIENT_ID",
-    "VITE_GOOGLE_CLIENT_ID",
     "GOOGLE_SHEET_URL",
-    "GOOGLE_ACTIVITY_LOG_URL",
   ];
 
   const missing = required.filter((key) => !process.env[key]);
